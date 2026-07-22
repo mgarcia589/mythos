@@ -1,0 +1,50 @@
+# Client data — NEVER commit
+sources/centerbridge/
+sources/cng/
+sources/ge-healthcare/
+sources/xml-parser/
+sources/*.xlsx
+sources/*.csv
+sources/*.pdf
+sources/*.docx
+sources/cb-*.xlsx
+sources/centerbridge-*.xlsx
+sources/pwc-brand/
+
+# Conversations and workspaces (local only)
+.conversations/
+.conversations-archived/
+.workspaces/
+.workspaces-archived/
+
+# Claude Code local state
+.claude/
+
+# Claudian (local assistant state)
+.claudian/
+
+# Nexus (local)
+.nexus/
+Nexus/
+
+# Obsidian vault config
+.obsidian/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temp
+*.tmp
+*.bak
