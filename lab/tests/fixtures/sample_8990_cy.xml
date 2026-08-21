@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Return xmlns="http://www.irs.gov/efile" returnVersion="2024v1.0">
+  <ReturnHeader>
+    <ReturnTs>2026-03-15T10:00:00</ReturnTs>
+    <TaxYr>2025</TaxYr>
+    <TaxPeriodBeginDt>2025-01-01</TaxPeriodBeginDt>
+    <TaxPeriodEndDt>2025-12-31</TaxPeriodEndDt>
+    <ReturnTypeCd>1120</ReturnTypeCd>
+    <SoftwareId>00000000</SoftwareId>
+    <SoftwareVersionNum>2025.1</SoftwareVersionNum>
+    <Filer>
+      <EIN>987654321</EIN>
+      <BusinessName>
+        <BusinessNameLine1Txt>163J TEST HOLDINGS INC</BusinessNameLine1Txt>
+      </BusinessName>
+    </Filer>
+  </ReturnHeader>
+
+  <!-- Entity A: Clean math, no carryforward -->
+  <SubsidiaryReturn subsidiaryReturnCount="5">
+    <ReturnHeader>
+      <TaxPeriodBeginDt>2025-01-01</TaxPeriodBeginDt>
+      <TaxPeriodEndDt>2025-12-31</TaxPeriodEndDt>
+      <SubsidiaryCorpGrp>
+        <BusinessName>
+          <BusinessNameLine1Txt>ALPHA CLEAN LTD</BusinessNameLine1Txt>
+        </BusinessName>
+        <ForeignAddress>
+          <CountryCd>UK</CountryCd>
+        </ForeignAddress>
+      </SubsidiaryCorpGrp>
+    </ReturnHeader>
+    <ReturnData>
+      <IRS5471 documentId="IRS5471-A001">
+        <ForeignEntityIdentificationGrp>
+          <ForeignEntityReferenceIdNum>A001</ForeignEntityReferenceIdNum>
+        </ForeignEntityIdentificationGrp>
+        <CountryUnderWhoseLawsIncCd>UK</CountryUnderWhoseLawsIncCd>
+        <FunctionalCurrencyCd>GBP</FunctionalCurrencyCd>
+      </IRS5471>
+      <IRS8990 documentId="F8990-A001">
+        <ForeignEntityName>
+          <BusinessNameLine1Txt>ALPHA CLEAN LTD</BusinessNameLine1Txt>
+        </ForeignEntityName>
+        <ForeignEntityIdentificationGrp>
+          <ForeignEntityReferenceIdNum>A001</ForeignEntityReferenceIdNum>
+        </ForeignEntityIdentificationGrp>
+        <CFCGroupElectionInd>false</CFCGroupElectionInd>
+        <FrmFldBySpcfdGrpParentInd>false</FrmFldBySpcfdGrpParentInd>
+        <SafeHarborElectionInd>false</SafeHarborElectionInd>
+        <!-- ATI = 1000000 + 500000 - 200000 = 1300000 -->
+        <TaxableIncomeAmt>1000000</TaxableIncomeAmt>
+        <BusInterestExpnsNotPassThruAmt>400000</BusInterestExpnsNotPassThruAmt>
+        <DeprecAmortzDpltnDedTakenAmt>100000</DeprecAmortzDpltnDedTakenAmt>
+        <TotalAdditionsAmt>500000</TotalAdditionsAmt>
+        <NotPassThruEntBusIntIncomeAmt>200000</NotPassThruEntBusIntIncomeAmt>
+        <TotalReductionsAmt>200000</TotalReductionsAmt>
+        <AdjustedTaxableIncomeAmt>1300000</AdjustedTaxableIncomeAmt>
+        <!-- BII + 30% ATI = 50000 + 390000 = 440000 -->
+        <CYBusinessInterestIncomeAmt>50000</CYBusinessInterestIncomeAmt>
+        <TotalBusinessInterestIncomeAmt>50000</TotalBusinessInterestIncomeAmt>
+        <AdjTaxableIncomeApplcblPctAmt>390000</AdjTaxableIncomeApplcblPctAmt>
+        <TotalBusIntExpnsLimitationAmt>440000</TotalBusIntExpnsLimitationAmt>
+        <!-- Allowable = 400000, Deducted = 400000, Disallowed = 0 -->
+        <CYBusIntExpnsBfr163jLmtAmt>400000</CYBusIntExpnsBfr163jLmtAmt>
+        <TotalAllowableBusIntExpnsAmt>400000</TotalAllowableBusIntExpnsAmt>
+        <TotCYBusinessIntExpnsDedAmt>400000</TotCYBusinessIntExpnsDedAmt>
+        <DisallowedBusInterestExpnsAmt>0</DisallowedBusInterestExpnsAmt>
+      </IRS8990>
+    </ReturnData>
+  </SubsidiaryReturn>
+
+  <!-- Entity B: Clean with carryforward -->
+  <SubsidiaryReturn>
+    <ReturnHeader>
+      <TaxPeriodBeginDt>2025-01-01</TaxPeriodBeginDt>
+      <TaxPeriodEndDt>2025-12-31</TaxPeriodEndDt>
+      <SubsidiaryCorpGrp>
+        <BusinessName>
+          <BusinessNameLine1Txt>BETA CARRYFORWARD GMBH</BusinessNameLine1Txt>
+        </BusinessName>
+        <ForeignAddress>
+          <CountryCd>DE</CountryCd>
+        </ForeignAddress>
+      </SubsidiaryCorpGrp>
+    </ReturnHeader>
+    <ReturnData>
+      <IRS5471 documentId="IRS5471-B002">
+        <ForeignEntityIdentificationGrp>
+          <ForeignEntityReferenceIdNum>B002</ForeignEntityReferenceIdNum>
+        </ForeignEntityIdentificationGrp>
+        <CountryUnderWhoseLawsIncCd>DE</CountryUnderWhoseLawsIncCd>
+        <FunctionalCurrencyCd>EUR</FunctionalCurrencyCd>
+      </IRS5471>
+      <IRS8990 documentId="F8990-B002">
+        <ForeignEntityName>
+          <BusinessNameLine1Txt>BETA CARRYFORWARD GMBH</BusinessNameLine1Txt>
+        </ForeignEntityName>
+        <ForeignEntityIdentificationGrp>
+          <ForeignEntityReferenceIdNum>B002</ForeignEntityReferenceIdNum>
+        </ForeignEntityIdentificationGrp>
+        <CFCGroupElectionInd>false</CFCGroupElectionInd>
+        <FrmFldBySpcfdGrpParentInd>false</FrmFldBySpcfdGrpParentInd>
+        <SafeHarborElectionInd>false</SafeHarborElectionInd>
+        <!-- ATI = 500000 + 800000 - 100000 = 1200000 -->
+        <TaxableIncomeAmt>500000</TaxableIncomeAmt>
+        <BusInterestExpnsNotPassThruAmt>700000</BusInterestExpnsNotPassThruAmt>
+        <DeprecAmortzDpltnDedTakenAmt>100000</DeprecAmortzDpltnDedTakenAmt>
+        <TotalAdditionsAmt>800000</TotalAdditionsAmt>
+        <NotPassThruEntBusIntIncomeAmt>100000</NotPassThruEntBusIntIncomeAmt>
+        <TotalReductionsAmt>100000</TotalReductionsAmt>
+        <AdjustedTaxableIncomeAmt>1200000</AdjustedTaxableIncomeAmt>
+        <!-- BII + 30% ATI = 30000 + 360000 = 390000 -->
+        <CYBusinessInterestIncomeAmt>30000</CYBusinessInterestIncomeAmt>
+        <TotalBusinessInterestIncomeAmt>30000</TotalBusinessInterestIncomeAmt>
+        <AdjTaxableIncomeApplcblPctAmt>360000</AdjTaxableIncomeApplcblPctAmt>
+        <TotalBusIntExpnsLimitationAmt>390000</TotalBusIntExpnsLimitationAmt>
+        <!-- Allowable = 700000 + 200000 cfwd = 900000 -->
+        <CYBusIntExpnsBfr163jLmtAmt>700000</CYBusIntExpnsBfr163jLmtAmt>
+        <CfwdPrevDsallwIntExpenseAmt>200000</CfwdPrevDsallwIntExpenseAmt>
+        <TotalAllowableBusIntExpnsAmt>900000</TotalAllowableBusIntExpnsAmt>
+        <!-- Deducted = min(limitation 390000, allowable 900000) = 390000 -->
+        <TotCYBusinessIntExpnsDedAmt>390000</TotCYBusinessIntExpnsDedAmt>
+        <!-- Disallowed = 900000 - 390000 = 510000 -->
+        <DisallowedBusInterestExpnsAmt>510000</DisallowedBusInterestExpnsAmt>
+      </IRS8990>
+    </ReturnData>
+  </SubsidiaryReturn>
+
+  <!-- Entity C: Negative ATI — tests BIE-010 -->
+  <SubsidiaryReturn>
+    <ReturnHeader>
+      <TaxPeriodBeginDt>2025-01-01</TaxPeriodBeginDt>
+      <TaxPeriodEndDt>2025-12-31</TaxPeriodEndDt>
+      <SubsidiaryCorpGrp>
+        <BusinessName>
+          <BusinessNameLine1Txt>GAMMA LOSS ENTITY SAS</BusinessNameLine1Txt>
+        </BusinessName>
+        <ForeignAddress>
+          <CountryCd>FR</CountryCd>
+        </ForeignAddress>
+      </SubsidiaryCorpGrp>
+    </ReturnHeader>
+    <ReturnData>
+      <IRS5471 documentId="IRS5471-C003">
+        <ForeignEntityIdentificationGrp>
+          <ForeignEntityReferenceIdNum>C003</ForeignEntityReferenceIdNum>
+        </ForeignEntityIdentificationGrp>
+        <CountryUnderWhoseLawsIncCd>FR</CountryUnderWhoseLawsIncCd>
+        <FunctionalCurrencyCd>EUR</FunctionalCurrencyCd>
+      </IRS5471>
+      <IRS8990 documentId="F8990-C003">
+        <ForeignEntityName>
+          <BusinessNameLine1Txt>GAMMA LOSS ENTITY SAS</BusinessNameLine1Txt>
+        </ForeignEntityName>
+        <ForeignEntityIdentificationGrp>
+          <ForeignEntityReferenceIdNum>C003</ForeignEntityReferenceIdNum>
+        </ForeignEntityIdentificationGrp>
+        <CFCGroupElectionInd>false</CFCGroupElectionInd>
+        <FrmFldBySpcfdGrpParentInd>false</FrmFldBySpcfdGrpParentInd>
+        <SafeHarborElectionInd>false</SafeHarborElectionInd>
+        <!-- ATI = -300000 + 50000 - 10000 = -260000 (negative) -->
+        <TaxableIncomeAmt>-300000</TaxableIncomeAmt>
+        <BusInterestExpnsNotPassThruAmt>50000</BusInterestExpnsNotPassThruAmt>
+        <TotalAdditionsAmt>50000</TotalAdditionsAmt>
+        <NotPassThruEntBusIntIncomeAmt>10000</NotPassThruEntBusIntIncomeAmt>
+        <TotalReductionsAmt>10000</TotalReductionsAmt>
+        <AdjustedTaxableIncomeAmt>-260000</AdjustedTaxableIncomeAmt>
+        <!-- ERROR: 30% of negative ATI should be 0, but shows 78000 (BIE-010 fires) -->
+        <CYBusinessInterestIncomeAmt>5000</CYBusinessInterestIncomeAmt>
+        <TotalBusinessInterestIncomeAmt>5000</TotalBusinessInterestIncomeAmt>
+        <AdjTaxableIncomeApplcblPctAmt>78000</AdjTaxableIncomeApplcblPctAmt>
+        <TotalBusIntExpnsLimitationAmt>83000</TotalBusIntExpnsLimitationAmt>
+        <CYBusIntExpnsBfr163jLmtAmt>50000</CYBusIntExpnsBfr163jLmtAmt>
+        <TotalAllowableBusIntExpnsAmt>50000</TotalAllowableBusIntExpnsAmt>
+        <TotCYBusinessIntExpnsDedAmt>50000</TotCYBusinessIntExpnsDedAmt>
+        <DisallowedBusInterestExpnsAmt>0</DisallowedBusInterestExpnsAmt>
+      </IRS8990>
+    </ReturnData>
+  </SubsidiaryReturn>
+
+  <!-- Entity D: Math errors — BIE-001, BIE-002, BIE-003 fire -->
+  <SubsidiaryReturn>
+    <ReturnHeader>
+      <TaxPeriodBeginDt>2025-01-01</TaxPeriodBeginDt>
+      <TaxPeriodEndDt>2025-12-31</TaxPeriodEndDt>
+      <SubsidiaryCorpGrp>
+        <BusinessName>
+          <BusinessNameLine1Txt>DELTA BROKEN MATH PTE</BusinessNameLine1Txt>
+        </BusinessName>
+        <ForeignAddress>
+          <CountryCd>SG</CountryCd>
+        </ForeignAddress>
+      </SubsidiaryCorpGrp>
+    </ReturnHeader>
+    <ReturnData>
+      <IRS5471 documentId="IRS5471-D004">
+        <ForeignEntityIdentificationGrp>
+          <ForeignEntityReferenceIdNum>D004</ForeignEntityReferenceIdNum>
+        </ForeignEntityIdentificationGrp>
+        <CountryUnderWhoseLawsIncCd>SG</CountryUnderWhoseLawsIncCd>
+        <FunctionalCurrencyCd>SGD</FunctionalCurrencyCd>
+      </IRS5471>
+      <IRS8990 documentId="F8990-D004">
+        <ForeignEntityName>
+          <BusinessNameLine1Txt>DELTA BROKEN MATH PTE</BusinessNameLine1Txt>
+        </ForeignEntityName>
+        <ForeignEntityIdentificationGrp>
+          <ForeignEntityReferenceIdNum>D004</ForeignEntityReferenceIdNum>
+        </ForeignEntityIdentificationGrp>
+        <CFCGroupElectionInd>false</CFCGroupElectionInd>
+        <FrmFldBySpcfdGrpParentInd>false</FrmFldBySpcfdGrpParentInd>
+        <SafeHarborElectionInd>false</SafeHarborElectionInd>
+        <!-- ATI should be 2000000 + 600000 - 150000 = 2450000 but shows 2000000 (BIE-001) -->
+        <TaxableIncomeAmt>2000000</TaxableIncomeAmt>
+        <BusInterestExpnsNotPassThruAmt>500000</BusInterestExpnsNotPassThruAmt>
+        <DeprecAmortzDpltnDedTakenAmt>100000</DeprecAmortzDpltnDedTakenAmt>
+        <TotalAdditionsAmt>600000</TotalAdditionsAmt>
+        <NotPassThruEntBusIntIncomeAmt>150000</NotPassThruEntBusIntIncomeAmt>
+        <TotalReductionsAmt>150000</TotalReductionsAmt>
+        <AdjustedTaxableIncomeAmt>2000000</AdjustedTaxableIncomeAmt>
+        <!-- 30% of 2000000 = 600000 but shows 700000 (BIE-002) -->
+        <CYBusinessInterestIncomeAmt>100000</CYBusinessInterestIncomeAmt>
+        <TotalBusinessInterestIncomeAmt>100000</TotalBusinessInterestIncomeAmt>
+        <AdjTaxableIncomeApplcblPctAmt>700000</AdjTaxableIncomeApplcblPctAmt>
+        <!-- Limitation should be BII + 30%ATI = 100000 + 700000 = 800000 but shows 900000 (BIE-003) -->
+        <TotalBusIntExpnsLimitationAmt>900000</TotalBusIntExpnsLimitationAmt>
+        <CYBusIntExpnsBfr163jLmtAmt>500000</CYBusIntExpnsBfr163jLmtAmt>
+        <TotalAllowableBusIntExpnsAmt>500000</TotalAllowableBusIntExpnsAmt>
+        <TotCYBusinessIntExpnsDedAmt>500000</TotCYBusinessIntExpnsDedAmt>
+        <DisallowedBusInterestExpnsAmt>0</DisallowedBusInterestExpnsAmt>
+      </IRS8990>
+    </ReturnData>
+  </SubsidiaryReturn>
+
+  <!-- Entity E: Net creditor with incorrect disallowed (BIE-012) -->
+  <SubsidiaryReturn>
+    <ReturnHeader>
+      <TaxPeriodBeginDt>2025-01-01</TaxPeriodBeginDt>
+      <TaxPeriodEndDt>2025-12-31</TaxPeriodEndDt>
+      <SubsidiaryCorpGrp>
+        <BusinessName>
+          <BusinessNameLine1Txt>EPSILON NET CREDITOR BV</BusinessNameLine1Txt>
+        </BusinessName>
+        <ForeignAddress>
+          <CountryCd>NL</CountryCd>
+        </ForeignAddress>
+      </SubsidiaryCorpGrp>
+    </ReturnHeader>
+    <ReturnData>
+      <IRS5471 documentId="IRS5471-E005">
+        <ForeignEntityIdentificationGrp>
+          <ForeignEntityReferenceIdNum>E005</ForeignEntityReferenceIdNum>
+        </ForeignEntityIdentificationGrp>
+        <CountryUnderWhoseLawsIncCd>NL</CountryUnderWhoseLawsIncCd>
+        <FunctionalCurrencyCd>EUR</FunctionalCurrencyCd>
+      </IRS5471>
+      <IRS8990 documentId="F8990-E005">
+        <ForeignEntityName>
+          <BusinessNameLine1Txt>EPSILON NET CREDITOR BV</BusinessNameLine1Txt>
+        </ForeignEntityName>
+        <ForeignEntityIdentificationGrp>
+          <ForeignEntityReferenceIdNum>E005</ForeignEntityReferenceIdNum>
+        </ForeignEntityIdentificationGrp>
+        <CFCGroupElectionInd>false</CFCGroupElectionInd>
+        <FrmFldBySpcfdGrpParentInd>false</FrmFldBySpcfdGrpParentInd>
+        <SafeHarborElectionInd>false</SafeHarborElectionInd>
+        <TaxableIncomeAmt>800000</TaxableIncomeAmt>
+        <BusInterestExpnsNotPassThruAmt>100000</BusInterestExpnsNotPassThruAmt>
+        <TotalAdditionsAmt>100000</TotalAdditionsAmt>
+        <TotalReductionsAmt>0</TotalReductionsAmt>
+        <AdjustedTaxableIncomeAmt>900000</AdjustedTaxableIncomeAmt>
+        <!-- Limitation = 500000 + 270000 = 770000 which covers allowable 100000 fully -->
+        <CYBusinessInterestIncomeAmt>500000</CYBusinessInterestIncomeAmt>
+        <TotalBusinessInterestIncomeAmt>500000</TotalBusinessInterestIncomeAmt>
+        <AdjTaxableIncomeApplcblPctAmt>270000</AdjTaxableIncomeApplcblPctAmt>
+        <TotalBusIntExpnsLimitationAmt>770000</TotalBusIntExpnsLimitationAmt>
+        <!-- Allowable = 100000, Limitation = 770000 >= Allowable, so disallowed should be 0 -->
+        <CYBusIntExpnsBfr163jLmtAmt>100000</CYBusIntExpnsBfr163jLmtAmt>
+        <TotalAllowableBusIntExpnsAmt>100000</TotalAllowableBusIntExpnsAmt>
+        <TotCYBusinessIntExpnsDedAmt>100000</TotCYBusinessIntExpnsDedAmt>
+        <!-- ERROR: Shows 50000 disallowed even though limitation covers everything (BIE-012) -->
+        <DisallowedBusInterestExpnsAmt>50000</DisallowedBusInterestExpnsAmt>
+      </IRS8990>
+    </ReturnData>
+  </SubsidiaryReturn>
+
+</Return>

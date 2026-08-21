@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Return xmlns="http://www.irs.gov/efile" returnVersion="2024v1.0">
+  <ReturnHeader>
+    <ReturnTs>2026-03-15T10:00:00</ReturnTs>
+    <TaxYr>2025</TaxYr>
+    <TaxPeriodBeginDt>2025-01-01</TaxPeriodBeginDt>
+    <TaxPeriodEndDt>2025-12-31</TaxPeriodEndDt>
+    <ReturnTypeCd>1120</ReturnTypeCd>
+    <SoftwareId>00000000</SoftwareId>
+    <SoftwareVersionNum>2025.1</SoftwareVersionNum>
+    <Filer>
+      <EIN>123456789</EIN>
+      <BusinessName>
+        <BusinessNameLine1Txt>TEST HOLDINGS INC</BusinessNameLine1Txt>
+      </BusinessName>
+    </Filer>
+  </ReturnHeader>
+
+  <!-- Entity E001: Clean entity (all checks pass) -->
+  <SubsidiaryReturn subsidiaryReturnCount="5">
+    <ReturnHeader>
+      <TaxPeriodBeginDt>2025-01-01</TaxPeriodBeginDt>
+      <TaxPeriodEndDt>2025-12-31</TaxPeriodEndDt>
+      <SubsidiaryCorpGrp>
+        <BusinessName>
+          <BusinessNameLine1Txt>CLEAN SUBSIDIARY LTD</BusinessNameLine1Txt>
+        </BusinessName>
+        <ForeignAddress>
+          <AddressLine1Txt>123 Main Street</AddressLine1Txt>
+          <CityNm>London</CityNm>
+          <CountryCd>UK</CountryCd>
+          <ForeignPostalCd>EC1A 1BB</ForeignPostalCd>
+        </ForeignAddress>
+      </SubsidiaryCorpGrp>
+    </ReturnHeader>
+    <ReturnData>
+      <IRS5471 documentId="IRS5471-E001">
+        <ForeignEntityIdentificationGrp>
+          <ForeignEntityReferenceIdNum>E001</ForeignEntityReferenceIdNum>
+        </ForeignEntityIdentificationGrp>
+        <CountryUnderWhoseLawsIncCd>UK</CountryUnderWhoseLawsIncCd>
+        <FunctionalCurrencyCd>GBP</FunctionalCurrencyCd>
+        <PrincipalPlaceOfBusCountryCd>UK</PrincipalPlaceOfBusCountryCd>
+        <CategoryOfFiler1aInd>X</CategoryOfFiler1aInd>
+      </IRS5471>
+      <IRS5471ScheduleC documentId="SchC-E001">
+        <ForeignTotalIncomeAmt>5000000</ForeignTotalIncomeAmt>
+        <ForeignTotalDeductionsAmt>2000000</ForeignTotalDeductionsAmt>
+        <ForeignCYNetIncomePerBookAmt>3000000</ForeignCYNetIncomePerBookAmt>
+        <USInterestIncomeAmt>150000</USInterestIncomeAmt>
+        <USInterestDeductionAmt>80000</USInterestDeductionAmt>
+      </IRS5471ScheduleC>
+      <IRS5471ScheduleH documentId="SchH-E001">
+        <ForeignCYNetIncomePerBooksAmt>3000000</ForeignCYNetIncomePerBooksAmt>
+        <TotalNetAdditionsAmt>200000</TotalNetAdditionsAmt>
+        <TotalNetSubtractionsAmt>500000</TotalNetSubtractionsAmt>
+        <CurrentEarningsAndProfitsAmt>2700000</CurrentEarningsAndProfitsAmt>
+        <ExchangeRt>0.7900</ExchangeRt>
+        <CurrEarnAndPrftInUSDollarsAmt>3417721</CurrEarnAndPrftInUSDollarsAmt>
+      </IRS5471ScheduleH>
+      <IRS5471ScheduleI1 documentId="SchI1-E001">
+        <GrossIncomeAmt>5000000</GrossIncomeAmt>
+        <SubpartFIncomeAmt>500000</SubpartFIncomeAmt>
+        <AllocableDeductionAmt>2000000</AllocableDeductionAmt>
+        <TestedIncomeLossGrp>
+          <USDollarAmt>2500000</USDollarAmt>
+          <FunctionalCurrencyAmt>1975000</FunctionalCurrencyAmt>
+        </TestedIncomeLossGrp>
+        <QBAIAmt>8000000</QBAIAmt>
+      </IRS5471ScheduleI1>
+      <IRS5471ScheduleE documentId="SchE-E001">
+        <TotalTaxInFunctionalCurAmt>900000</TotalTaxInFunctionalCurAmt>
+      </IRS5471ScheduleE>
+      <IRS5471ScheduleF documentId="SchF-E001">
+        <BegngAcctPrdCashAmt>1000000</BegngAcctPrdCashAmt>
+        <BegngAcctPrdTotalAssetsAmt>50000000</BegngAcctPrdTotalAssetsAmt>
+        <BegngAcctPrdTotLiabShrEqtyAmt>50000000</BegngAcctPrdTotLiabShrEqtyAmt>
+        <EndAcctPrdCashAmt>1200000</EndAcctPrdCashAmt>
+        <EndAcctPrdTotalAssetsAmt>55000000</EndAcctPrdTotalAssetsAmt>
+        <EndAcctPrdTotLiabShrEqtyAmt>55000000</EndAcctPrdTotLiabShrEqtyAmt>
+      </IRS5471ScheduleF>
+      <IRS5471ScheduleJ documentId="SchJ-E001">
+        <SeparateCategoryCd>GEN</SeparateCategoryCd>
+        <Post2017EPNotPrevTaxedGrp>
+          <BeginningYearBalanceAmt>10000000</BeginningYearBalanceAmt>
+          <CurrentYearEPAmt>3417721</CurrentYearEPAmt>
+          <BalanceBeginningNextYearAmt>13417721</BalanceBeginningNextYearAmt>
+        </Post2017EPNotPrevTaxedGrp>
+        <TotalSection964AEPGrp>
+          <BeginningYearBalanceAmt>10000000</BeginningYearBalanceAmt>
+          <BalanceBeginningNextYearAmt>13417721</BalanceBeginningNextYearAmt>
+        </TotalSection964AEPGrp>
+      </IRS5471ScheduleJ>
+      <IRS5471ScheduleQ documentId="SchQ-E001-GEN">
+        <SeparateCategoryCd>GEN</SeparateCategoryCd>
+        <TotalTestedIncomeGrp>
+          <TotalGrossIncomeAmt>4800000</TotalGrossIncomeAmt>
+        </TotalTestedIncomeGrp>
+        <TestedIncomeGrp>
+          <NetIncomeAmt>1900000</NetIncomeAmt>
+        </TestedIncomeGrp>
+      </IRS5471ScheduleQ>
+      <IRS5471ScheduleI documentId="SchI-E001">
+        <IncomeBlockedInd>X</IncomeBlockedInd>
+      </IRS5471ScheduleI>
+      <IRS5471ScheduleP documentId="SchP-E001-GEN">
+        <SeparateCategoryCd>GEN</SeparateCategoryCd>
+      </IRS5471ScheduleP>
+    </ReturnData>
+  </SubsidiaryReturn>
+
+  <!-- Entity E002: Triggers FLO-005 (tested loss with taxes) + RSN-003 (ETR anomaly) -->
+  <SubsidiaryReturn>
+    <ReturnHeader>
+      <TaxPeriodBeginDt>2025-01-01</TaxPeriodBeginDt>
+      <TaxPeriodEndDt>2025-12-31</TaxPeriodEndDt>
+      <SubsidiaryCorpGrp>
+        <BusinessName>
+          <BusinessNameLine1Txt>LOSS ENTITY GMBH</BusinessNameLine1Txt>
+        </BusinessName>
+        <ForeignAddress>
+          <AddressLine1Txt>Hauptstrasse 1</AddressLine1Txt>
+          <CityNm>Berlin</CityNm>
+          <CountryCd>DE</CountryCd>
+          <ForeignPostalCd>10115</ForeignPostalCd>
+        </ForeignAddress>
+      </SubsidiaryCorpGrp>
+    </ReturnHeader>
+    <ReturnData>
+      <IRS5471 documentId="IRS5471-E002">
+        <ForeignEntityIdentificationGrp>
+          <ForeignEntityReferenceIdNum>E002</ForeignEntityReferenceIdNum>
+        </ForeignEntityIdentificationGrp>
+        <CountryUnderWhoseLawsIncCd>DE</CountryUnderWhoseLawsIncCd>
+        <FunctionalCurrencyCd>EUR</FunctionalCurrencyCd>
+        <PrincipalPlaceOfBusCountryCd>DE</PrincipalPlaceOfBusCountryCd>
+      </IRS5471>
+      <IRS5471ScheduleH documentId="SchH-E002">
+        <ForeignCYNetIncomePerBooksAmt>-500000</ForeignCYNetIncomePerBooksAmt>
+        <CurrentEarningsAndProfitsAmt>-800000</CurrentEarningsAndProfitsAmt>
+        <ExchangeRt>0.9200</ExchangeRt>
+        <CurrEarnAndPrftInUSDollarsAmt>-869565</CurrEarnAndPrftInUSDollarsAmt>
+      </IRS5471ScheduleH>
+      <IRS5471ScheduleI1 documentId="SchI1-E002">
+        <GrossIncomeAmt>200000</GrossIncomeAmt>
+        <SubpartFIncomeAmt>0</SubpartFIncomeAmt>
+        <AllocableDeductionAmt>700000</AllocableDeductionAmt>
+        <TestedIncomeLossGrp>
+          <USDollarAmt>-500000</USDollarAmt>
+          <FunctionalCurrencyAmt>-460000</FunctionalCurrencyAmt>
+        </TestedIncomeLossGrp>
+        <TestedForeignIncomeTaxesGrp>
+          <USDollarAmt>50000</USDollarAmt>
+        </TestedForeignIncomeTaxesGrp>
+      </IRS5471ScheduleI1>
+      <IRS5471ScheduleF documentId="SchF-E002">
+        <BegngAcctPrdTotalAssetsAmt>20000000</BegngAcctPrdTotalAssetsAmt>
+        <BegngAcctPrdTotLiabShrEqtyAmt>20000000</BegngAcctPrdTotLiabShrEqtyAmt>
+        <EndAcctPrdTotalAssetsAmt>18000000</EndAcctPrdTotalAssetsAmt>
+        <EndAcctPrdTotLiabShrEqtyAmt>18000000</EndAcctPrdTotLiabShrEqtyAmt>
+      </IRS5471ScheduleF>
+    </ReturnData>
+  </SubsidiaryReturn>
+
+  <!-- Entity E003: Triggers CMP-001 (missing Sch H) + CMP-002 (no I-1) -->
+  <SubsidiaryReturn>
+    <ReturnHeader>
+      <TaxPeriodBeginDt>2025-01-01</TaxPeriodBeginDt>
+      <TaxPeriodEndDt>2025-12-31</TaxPeriodEndDt>
+      <SubsidiaryCorpGrp>
+        <BusinessName>
+          <BusinessNameLine1Txt>DORMANT HOLDCO SA</BusinessNameLine1Txt>
+        </BusinessName>
+        <ForeignAddress>
+          <AddressLine1Txt>Rue de Commerce 5</AddressLine1Txt>
+          <CityNm>Luxembourg</CityNm>
+          <CountryCd>LU</CountryCd>
+          <ForeignPostalCd>L-1234</ForeignPostalCd>
+        </ForeignAddress>
+      </SubsidiaryCorpGrp>
+    </ReturnHeader>
+    <ReturnData>
+      <IRS5471 documentId="IRS5471-E003">
+        <ForeignEntityIdentificationGrp>
+          <ForeignEntityReferenceIdNum>E003</ForeignEntityReferenceIdNum>
+        </ForeignEntityIdentificationGrp>
+        <CountryUnderWhoseLawsIncCd>LU</CountryUnderWhoseLawsIncCd>
+        <FunctionalCurrencyCd>EUR</FunctionalCurrencyCd>
+        <PrincipalPlaceOfBusCountryCd>LU</PrincipalPlaceOfBusCountryCd>
+      </IRS5471>
+      <IRS5471ScheduleF documentId="SchF-E003">
+        <BegngAcctPrdTotalAssetsAmt>5000000</BegngAcctPrdTotalAssetsAmt>
+        <BegngAcctPrdTotLiabShrEqtyAmt>5000000</BegngAcctPrdTotLiabShrEqtyAmt>
+        <EndAcctPrdTotalAssetsAmt>5000000</EndAcctPrdTotalAssetsAmt>
+        <EndAcctPrdTotLiabShrEqtyAmt>5000000</EndAcctPrdTotLiabShrEqtyAmt>
+      </IRS5471ScheduleF>
+    </ReturnData>
+  </SubsidiaryReturn>
+
+  <!-- Entity E004: Triggers FLO-008 (BS doesn't balance) + RSN-006 (QBAI > assets) -->
+  <SubsidiaryReturn>
+    <ReturnHeader>
+      <TaxPeriodBeginDt>2025-01-01</TaxPeriodBeginDt>
+      <TaxPeriodEndDt>2025-12-31</TaxPeriodEndDt>
+      <SubsidiaryCorpGrp>
+        <BusinessName>
+          <BusinessNameLine1Txt>BROKEN BALANCE PTY LTD</BusinessNameLine1Txt>
+        </BusinessName>
+        <ForeignAddress>
+          <AddressLine1Txt>42 George Street</AddressLine1Txt>
+          <CityNm>Sydney</CityNm>
+          <CountryCd>AU</CountryCd>
+          <ForeignPostalCd>2000</ForeignPostalCd>
+        </ForeignAddress>
+      </SubsidiaryCorpGrp>
+    </ReturnHeader>
+    <ReturnData>
+      <IRS5471 documentId="IRS5471-E004">
+        <ForeignEntityIdentificationGrp>
+          <ForeignEntityReferenceIdNum>E004</ForeignEntityReferenceIdNum>
+        </ForeignEntityIdentificationGrp>
+        <CountryUnderWhoseLawsIncCd>AU</CountryUnderWhoseLawsIncCd>
+        <FunctionalCurrencyCd>AUD</FunctionalCurrencyCd>
+        <PrincipalPlaceOfBusCountryCd>AU</PrincipalPlaceOfBusCountryCd>
+      </IRS5471>
+      <IRS5471ScheduleH documentId="SchH-E004">
+        <ForeignCYNetIncomePerBooksAmt>1000000</ForeignCYNetIncomePerBooksAmt>
+        <CurrentEarningsAndProfitsAmt>800000</CurrentEarningsAndProfitsAmt>
+        <ExchangeRt>1.5300</ExchangeRt>
+        <CurrEarnAndPrftInUSDollarsAmt>522875</CurrEarnAndPrftInUSDollarsAmt>
+      </IRS5471ScheduleH>
+      <IRS5471ScheduleI1 documentId="SchI1-E004">
+        <GrossIncomeAmt>1000000</GrossIncomeAmt>
+        <SubpartFIncomeAmt>0</SubpartFIncomeAmt>
+        <AllocableDeductionAmt>200000</AllocableDeductionAmt>
+        <TestedIncomeLossGrp>
+          <USDollarAmt>800000</USDollarAmt>
+          <FunctionalCurrencyAmt>522875</FunctionalCurrencyAmt>
+        </TestedIncomeLossGrp>
+        <QBAIAmt>15000000</QBAIAmt>
+      </IRS5471ScheduleI1>
+      <IRS5471ScheduleE documentId="SchE-E004">
+        <TotalTaxInFunctionalCurAmt>300000</TotalTaxInFunctionalCurAmt>
+      </IRS5471ScheduleE>
+      <IRS5471ScheduleF documentId="SchF-E004">
+        <BegngAcctPrdTotalAssetsAmt>10000000</BegngAcctPrdTotalAssetsAmt>
+        <BegngAcctPrdTotLiabShrEqtyAmt>10000000</BegngAcctPrdTotLiabShrEqtyAmt>
+        <EndAcctPrdTotalAssetsAmt>12000000</EndAcctPrdTotalAssetsAmt>
+        <EndAcctPrdTotLiabShrEqtyAmt>11500000</EndAcctPrdTotLiabShrEqtyAmt>
+      </IRS5471ScheduleF>
+    </ReturnData>
+  </SubsidiaryReturn>
+
+  <!-- Entity E005: Triggers FLO-003 (I-1 reconciliation fail) + CMP-005 (no FX rate) -->
+  <SubsidiaryReturn>
+    <ReturnHeader>
+      <TaxPeriodBeginDt>2025-01-01</TaxPeriodBeginDt>
+      <TaxPeriodEndDt>2025-12-31</TaxPeriodEndDt>
+      <SubsidiaryCorpGrp>
+        <BusinessName>
+          <BusinessNameLine1Txt>RECON FAIL CORP</BusinessNameLine1Txt>
+        </BusinessName>
+        <ForeignAddress>
+          <AddressLine1Txt>1-1 Marunouchi</AddressLine1Txt>
+          <CityNm>Tokyo</CityNm>
+          <CountryCd>JP</CountryCd>
+          <ForeignPostalCd>100-0005</ForeignPostalCd>
+        </ForeignAddress>
+      </SubsidiaryCorpGrp>
+    </ReturnHeader>
+    <ReturnData>
+      <IRS5471 documentId="IRS5471-E005">
+        <ForeignEntityIdentificationGrp>
+          <ForeignEntityReferenceIdNum>E005</ForeignEntityReferenceIdNum>
+        </ForeignEntityIdentificationGrp>
+        <CountryUnderWhoseLawsIncCd>JP</CountryUnderWhoseLawsIncCd>
+        <FunctionalCurrencyCd>JPY</FunctionalCurrencyCd>
+        <PrincipalPlaceOfBusCountryCd>JP</PrincipalPlaceOfBusCountryCd>
+      </IRS5471>
+      <IRS5471ScheduleH documentId="SchH-E005">
+        <ForeignCYNetIncomePerBooksAmt>500000000</ForeignCYNetIncomePerBooksAmt>
+        <CurrentEarningsAndProfitsAmt>400000000</CurrentEarningsAndProfitsAmt>
+        <CurrEarnAndPrftInUSDollarsAmt>2666666</CurrEarnAndPrftInUSDollarsAmt>
+      </IRS5471ScheduleH>
+      <IRS5471ScheduleI1 documentId="SchI1-E005">
+        <GrossIncomeAmt>800000000</GrossIncomeAmt>
+        <SubpartFIncomeAmt>100000000</SubpartFIncomeAmt>
+        <AllocableDeductionAmt>200000000</AllocableDeductionAmt>
+        <TestedIncomeLossGrp>
+          <USDollarAmt>200000000</USDollarAmt>
+          <FunctionalCurrencyAmt>200000000</FunctionalCurrencyAmt>
+        </TestedIncomeLossGrp>
+      </IRS5471ScheduleI1>
+      <IRS5471ScheduleF documentId="SchF-E005">
+        <BegngAcctPrdTotalAssetsAmt>5000000000</BegngAcctPrdTotalAssetsAmt>
+        <BegngAcctPrdTotLiabShrEqtyAmt>5000000000</BegngAcctPrdTotLiabShrEqtyAmt>
+        <EndAcctPrdTotalAssetsAmt>5200000000</EndAcctPrdTotalAssetsAmt>
+        <EndAcctPrdTotLiabShrEqtyAmt>5200000000</EndAcctPrdTotLiabShrEqtyAmt>
+      </IRS5471ScheduleF>
+    </ReturnData>
+  </SubsidiaryReturn>
+
+  <!-- Top-level Form 8990 (Section 163j) — triggers XFM-001/002/003 -->
+  <ReturnData>
+    <IRS8990 documentId="F8990-001">
+      <CYBusinessInterestIncomeAmt>200000</CYBusinessInterestIncomeAmt>
+      <BusInterestExpnsNotPassThruAmt>100000</BusInterestExpnsNotPassThruAmt>
+      <SafeHarborElectionInd>X</SafeHarborElectionInd>
+    </IRS8990>
+  </ReturnData>
+</Return>

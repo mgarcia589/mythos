@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Return xmlns="http://www.irs.gov/efile" returnVersion="2023v1.0">
+  <ReturnHeader>
+    <ReturnTs>2025-03-15T10:00:00</ReturnTs>
+    <TaxYr>2024</TaxYr>
+    <TaxPeriodBeginDt>2024-01-01</TaxPeriodBeginDt>
+    <TaxPeriodEndDt>2024-12-31</TaxPeriodEndDt>
+    <ReturnTypeCd>1120</ReturnTypeCd>
+    <SoftwareId>00000000</SoftwareId>
+    <SoftwareVersionNum>2024.1</SoftwareVersionNum>
+    <Filer>
+      <EIN>987654321</EIN>
+      <BusinessName>
+        <BusinessNameLine1Txt>163J TEST HOLDINGS INC</BusinessNameLine1Txt>
+      </BusinessName>
+    </Filer>
+  </ReturnHeader>
+
+  <!-- Entity A: PY — zero disallowed (clean, no carryforward expected in CY) -->
+  <SubsidiaryReturn subsidiaryReturnCount="4">
+    <ReturnHeader>
+      <TaxPeriodBeginDt>2024-01-01</TaxPeriodBeginDt>
+      <TaxPeriodEndDt>2024-12-31</TaxPeriodEndDt>
+      <SubsidiaryCorpGrp>
+        <BusinessName>
+          <BusinessNameLine1Txt>ALPHA CLEAN LTD</BusinessNameLine1Txt>
+        </BusinessName>
+        <ForeignAddress>
+          <CountryCd>UK</CountryCd>
+        </ForeignAddress>
+      </SubsidiaryCorpGrp>
+    </ReturnHeader>
+    <ReturnData>
+      <IRS5471 documentId="IRS5471-A001">
+        <ForeignEntityIdentificationGrp>
+          <ForeignEntityReferenceIdNum>A001</ForeignEntityReferenceIdNum>
+        </ForeignEntityIdentificationGrp>
+        <CountryUnderWhoseLawsIncCd>UK</CountryUnderWhoseLawsIncCd>
+        <FunctionalCurrencyCd>GBP</FunctionalCurrencyCd>
+      </IRS5471>
+      <IRS8990 documentId="F8990-A001-PY">
+        <ForeignEntityName>
+          <BusinessNameLine1Txt>ALPHA CLEAN LTD</BusinessNameLine1Txt>
+        </ForeignEntityName>
+        <ForeignEntityIdentificationGrp>
+          <ForeignEntityReferenceIdNum>A001</ForeignEntityReferenceIdNum>
+        </ForeignEntityIdentificationGrp>
+        <CFCGroupElectionInd>false</CFCGroupElectionInd>
+        <FrmFldBySpcfdGrpParentInd>false</FrmFldBySpcfdGrpParentInd>
+        <TaxableIncomeAmt>900000</TaxableIncomeAmt>
+        <AdjustedTaxableIncomeAmt>1100000</AdjustedTaxableIncomeAmt>
+        <TotalAdditionsAmt>300000</TotalAdditionsAmt>
+        <TotalReductionsAmt>100000</TotalReductionsAmt>
+        <DisallowedBusInterestExpnsAmt>0</DisallowedBusInterestExpnsAmt>
+      </IRS8990>
+    </ReturnData>
+  </SubsidiaryReturn>
+
+  <!-- Entity B: PY — 200000 disallowed (matches CY carryforward exactly) -->
+  <SubsidiaryReturn>
+    <ReturnHeader>
+      <TaxPeriodBeginDt>2024-01-01</TaxPeriodBeginDt>
+      <TaxPeriodEndDt>2024-12-31</TaxPeriodEndDt>
+      <SubsidiaryCorpGrp>
+        <BusinessName>
+          <BusinessNameLine1Txt>BETA CARRYFORWARD GMBH</BusinessNameLine1Txt>
+        </BusinessName>
+        <ForeignAddress>
+          <CountryCd>DE</CountryCd>
+        </ForeignAddress>
+      </SubsidiaryCorpGrp>
+    </ReturnHeader>
+    <ReturnData>
+      <IRS5471 documentId="IRS5471-B002">
+        <ForeignEntityIdentificationGrp>
+          <ForeignEntityReferenceIdNum>B002</ForeignEntityReferenceIdNum>
+        </ForeignEntityIdentificationGrp>
+        <CountryUnderWhoseLawsIncCd>DE</CountryUnderWhoseLawsIncCd>
+        <FunctionalCurrencyCd>EUR</FunctionalCurrencyCd>
+      </IRS5471>
+      <IRS8990 documentId="F8990-B002-PY">
+        <ForeignEntityName>
+          <BusinessNameLine1Txt>BETA CARRYFORWARD GMBH</BusinessNameLine1Txt>
+        </ForeignEntityName>
+        <ForeignEntityIdentificationGrp>
+          <ForeignEntityReferenceIdNum>B002</ForeignEntityReferenceIdNum>
+        </ForeignEntityIdentificationGrp>
+        <CFCGroupElectionInd>false</CFCGroupElectionInd>
+        <FrmFldBySpcfdGrpParentInd>false</FrmFldBySpcfdGrpParentInd>
+        <TaxableIncomeAmt>400000</TaxableIncomeAmt>
+        <AdjustedTaxableIncomeAmt>800000</AdjustedTaxableIncomeAmt>
+        <TotalAdditionsAmt>500000</TotalAdditionsAmt>
+        <TotalReductionsAmt>100000</TotalReductionsAmt>
+        <CYBusIntExpnsBfr163jLmtAmt>600000</CYBusIntExpnsBfr163jLmtAmt>
+        <TotalAllowableBusIntExpnsAmt>600000</TotalAllowableBusIntExpnsAmt>
+        <TotCYBusinessIntExpnsDedAmt>400000</TotCYBusinessIntExpnsDedAmt>
+        <!-- PY disallowed = 200000, CY cfwd should also be 200000 (it is — clean) -->
+        <DisallowedBusInterestExpnsAmt>200000</DisallowedBusInterestExpnsAmt>
+      </IRS8990>
+    </ReturnData>
+  </SubsidiaryReturn>
+
+  <!-- Entity D: PY — 300000 disallowed (CY has NO carryforward → BIE-013 fires) -->
+  <SubsidiaryReturn>
+    <ReturnHeader>
+      <TaxPeriodBeginDt>2024-01-01</TaxPeriodBeginDt>
+      <TaxPeriodEndDt>2024-12-31</TaxPeriodEndDt>
+      <SubsidiaryCorpGrp>
+        <BusinessName>
+          <BusinessNameLine1Txt>DELTA BROKEN MATH PTE</BusinessNameLine1Txt>
+        </BusinessName>
+        <ForeignAddress>
+          <CountryCd>SG</CountryCd>
+        </ForeignAddress>
+      </SubsidiaryCorpGrp>
+    </ReturnHeader>
+    <ReturnData>
+      <IRS5471 documentId="IRS5471-D004">
+        <ForeignEntityIdentificationGrp>
+          <ForeignEntityReferenceIdNum>D004</ForeignEntityReferenceIdNum>
+        </ForeignEntityIdentificationGrp>
+        <CountryUnderWhoseLawsIncCd>SG</CountryUnderWhoseLawsIncCd>
+        <FunctionalCurrencyCd>SGD</FunctionalCurrencyCd>
+      </IRS5471>
+      <IRS8990 documentId="F8990-D004-PY">
+        <ForeignEntityName>
+          <BusinessNameLine1Txt>DELTA BROKEN MATH PTE</BusinessNameLine1Txt>
+        </ForeignEntityName>
+        <ForeignEntityIdentificationGrp>
+          <ForeignEntityReferenceIdNum>D004</ForeignEntityReferenceIdNum>
+        </ForeignEntityIdentificationGrp>
+        <CFCGroupElectionInd>false</CFCGroupElectionInd>
+        <FrmFldBySpcfdGrpParentInd>false</FrmFldBySpcfdGrpParentInd>
+        <TaxableIncomeAmt>1500000</TaxableIncomeAmt>
+        <AdjustedTaxableIncomeAmt>1800000</AdjustedTaxableIncomeAmt>
+        <TotalAdditionsAmt>400000</TotalAdditionsAmt>
+        <TotalReductionsAmt>100000</TotalReductionsAmt>
+        <CYBusIntExpnsBfr163jLmtAmt>800000</CYBusIntExpnsBfr163jLmtAmt>
+        <TotalAllowableBusIntExpnsAmt>800000</TotalAllowableBusIntExpnsAmt>
+        <TotCYBusinessIntExpnsDedAmt>500000</TotCYBusinessIntExpnsDedAmt>
+        <!-- PY disallowed = 300000 — CY fixture has CfwdPrevDsallwIntExpenseAmt MISSING → BIE-013 -->
+        <DisallowedBusInterestExpnsAmt>300000</DisallowedBusInterestExpnsAmt>
+      </IRS8990>
+    </ReturnData>
+  </SubsidiaryReturn>
+
+  <!-- Entity E: PY — 0 disallowed (matches CY which also has 0 cfwd) -->
+  <SubsidiaryReturn>
+    <ReturnHeader>
+      <TaxPeriodBeginDt>2024-01-01</TaxPeriodBeginDt>
+      <TaxPeriodEndDt>2024-12-31</TaxPeriodEndDt>
+      <SubsidiaryCorpGrp>
+        <BusinessName>
+          <BusinessNameLine1Txt>EPSILON NET CREDITOR BV</BusinessNameLine1Txt>
+        </BusinessName>
+        <ForeignAddress>
+          <CountryCd>NL</CountryCd>
+        </ForeignAddress>
+      </SubsidiaryCorpGrp>
+    </ReturnHeader>
+    <ReturnData>
+      <IRS5471 documentId="IRS5471-E005">
+        <ForeignEntityIdentificationGrp>
+          <ForeignEntityReferenceIdNum>E005</ForeignEntityReferenceIdNum>
+        </ForeignEntityIdentificationGrp>
+        <CountryUnderWhoseLawsIncCd>NL</CountryUnderWhoseLawsIncCd>
+        <FunctionalCurrencyCd>EUR</FunctionalCurrencyCd>
+      </IRS5471>
+      <IRS8990 documentId="F8990-E005-PY">
+        <ForeignEntityName>
+          <BusinessNameLine1Txt>EPSILON NET CREDITOR BV</BusinessNameLine1Txt>
+        </ForeignEntityName>
+        <ForeignEntityIdentificationGrp>
+          <ForeignEntityReferenceIdNum>E005</ForeignEntityReferenceIdNum>
+        </ForeignEntityIdentificationGrp>
+        <CFCGroupElectionInd>false</CFCGroupElectionInd>
+        <FrmFldBySpcfdGrpParentInd>false</FrmFldBySpcfdGrpParentInd>
+        <TaxableIncomeAmt>750000</TaxableIncomeAmt>
+        <AdjustedTaxableIncomeAmt>850000</AdjustedTaxableIncomeAmt>
+        <TotalAdditionsAmt>100000</TotalAdditionsAmt>
+        <TotalReductionsAmt>0</TotalReductionsAmt>
+        <DisallowedBusInterestExpnsAmt>0</DisallowedBusInterestExpnsAmt>
+      </IRS8990>
+    </ReturnData>
+  </SubsidiaryReturn>
+
+</Return>

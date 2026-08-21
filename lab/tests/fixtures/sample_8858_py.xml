@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Return xmlns="http://www.irs.gov/efile" returnVersion="2024v1.0">
+  <ReturnHeader>
+    <ReturnTs>2025-03-15T10:00:00</ReturnTs>
+    <TaxYr>2024</TaxYr>
+    <TaxPeriodBeginDt>2024-01-01</TaxPeriodBeginDt>
+    <TaxPeriodEndDt>2024-12-31</TaxPeriodEndDt>
+    <ReturnTypeCd>1120</ReturnTypeCd>
+    <Filer>
+      <EIN>123456789</EIN>
+      <BusinessName>
+        <BusinessNameLine1Txt>TEST HOLDINGS INC</BusinessNameLine1Txt>
+      </BusinessName>
+    </Filer>
+  </ReturnHeader>
+
+  <!-- FDE001: Clean entity PY -->
+  <SubsidiaryReturn>
+    <ReturnHeader>
+      <TaxPeriodBeginDt>2024-01-01</TaxPeriodBeginDt>
+      <TaxPeriodEndDt>2024-12-31</TaxPeriodEndDt>
+    </ReturnHeader>
+    <ReturnData>
+      <IRS8858 documentId="8858-FDE001-PY">
+        <FDEUSPersonInd>X</FDEUSPersonInd>
+        <FDEOrFBName>
+          <BusinessNameLine1Txt>CLEAN FDE LLC</BusinessNameLine1Txt>
+        </FDEOrFBName>
+        <ForeignEntityIdentificationGrp>
+          <ForeignEntityReferenceIdNum>FDE001</ForeignEntityReferenceIdNum>
+        </ForeignEntityIdentificationGrp>
+        <CountryEntityOrgDetail>
+          <CntryUnderWhoseLawsOrganizedCd>UK</CntryUnderWhoseLawsOrganizedCd>
+        </CountryEntityOrgDetail>
+        <FunctionalCurrencyCd>USD</FunctionalCurrencyCd>
+        <TaxOwnerName>
+          <BusinessNameLine1Txt>TEST HOLDINGS INC</BusinessNameLine1Txt>
+        </TaxOwnerName>
+        <IRS8858ScheduleF>
+          <CashAndOtherCurrentAssets>
+            <BeginningAmt>7000000</BeginningAmt>
+            <EndingAmt>8000000</EndingAmt>
+          </CashAndOtherCurrentAssets>
+          <OtherAssetsBalanceSheet>
+            <BeginningAmt>1500000</BeginningAmt>
+            <EndingAmt>2000000</EndingAmt>
+          </OtherAssetsBalanceSheet>
+          <TotalAssetsBalanceSheet>
+            <BeginningAmt>8500000</BeginningAmt>
+            <EndingAmt>10000000</EndingAmt>
+          </TotalAssetsBalanceSheet>
+          <LiabilitiesBalanceSheet>
+            <BeginningAmt>3500000</BeginningAmt>
+            <EndingAmt>4000000</EndingAmt>
+          </LiabilitiesBalanceSheet>
+          <OwnerEquityBalanceSheet>
+            <BeginningAmt>5000000</BeginningAmt>
+            <EndingAmt>6000000</EndingAmt>
+          </OwnerEquityBalanceSheet>
+          <TotLiabOwnerEquityBalanceSheet>
+            <BeginningAmt>8500000</BeginningAmt>
+            <EndingAmt>10000000</EndingAmt>
+          </TotLiabOwnerEquityBalanceSheet>
+        </IRS8858ScheduleF>
+        <IRS8858ScheduleH>
+          <ForeignCYNetIncomePerBooksAmt>1500000</ForeignCYNetIncomePerBooksAmt>
+          <CurrentEarningsAndProfitsAmt>1500000</CurrentEarningsAndProfitsAmt>
+          <CurrEarnAndPrftInUSDollarsAmt>1500000</CurrEarnAndPrftInUSDollarsAmt>
+          <ExchangeRt>1.000000</ExchangeRt>
+        </IRS8858ScheduleH>
+      </IRS8858>
+    </ReturnData>
+  </SubsidiaryReturn>
+
+  <!-- FDE002: Euro entity PY -->
+  <SubsidiaryReturn>
+    <ReturnHeader>
+      <TaxPeriodBeginDt>2024-01-01</TaxPeriodBeginDt>
+      <TaxPeriodEndDt>2024-12-31</TaxPeriodEndDt>
+    </ReturnHeader>
+    <ReturnData>
+      <IRS8858 documentId="8858-FDE002-PY">
+        <FBCFCInd>X</FBCFCInd>
+        <FDEOrFBName>
+          <BusinessNameLine1Txt>EURO BRANCH GMBH</BusinessNameLine1Txt>
+        </FDEOrFBName>
+        <ForeignEntityIdentificationGrp>
+          <ForeignEntityReferenceIdNum>FDE002</ForeignEntityReferenceIdNum>
+        </ForeignEntityIdentificationGrp>
+        <CountryEntityOrgDetail>
+          <CntryUnderWhoseLawsOrganizedCd>GM</CntryUnderWhoseLawsOrganizedCd>
+        </CountryEntityOrgDetail>
+        <FunctionalCurrencyCd>EUR</FunctionalCurrencyCd>
+        <TaxOwnerName>
+          <BusinessNameLine1Txt>TEST HOLDINGS INC</BusinessNameLine1Txt>
+        </TaxOwnerName>
+        <IRS8858ScheduleF>
+          <CashAndOtherCurrentAssets>
+            <BeginningAmt>2500000</BeginningAmt>
+            <EndingAmt>3000000</EndingAmt>
+          </CashAndOtherCurrentAssets>
+          <OtherAssetsBalanceSheet>
+            <BeginningAmt>800000</BeginningAmt>
+            <EndingAmt>1000000</EndingAmt>
+          </OtherAssetsBalanceSheet>
+          <TotalAssetsBalanceSheet>
+            <BeginningAmt>3300000</BeginningAmt>
+            <EndingAmt>4000000</EndingAmt>
+          </TotalAssetsBalanceSheet>
+          <LiabilitiesBalanceSheet>
+            <BeginningAmt>1200000</BeginningAmt>
+            <EndingAmt>1500000</EndingAmt>
+          </LiabilitiesBalanceSheet>
+          <OwnerEquityBalanceSheet>
+            <BeginningAmt>2100000</BeginningAmt>
+            <EndingAmt>2500000</EndingAmt>
+          </OwnerEquityBalanceSheet>
+          <TotLiabOwnerEquityBalanceSheet>
+            <BeginningAmt>3300000</BeginningAmt>
+            <EndingAmt>4000000</EndingAmt>
+          </TotLiabOwnerEquityBalanceSheet>
+        </IRS8858ScheduleF>
+        <IRS8858ScheduleH>
+          <ForeignCYNetIncomePerBooksAmt>700000</ForeignCYNetIncomePerBooksAmt>
+          <CurrentEarningsAndProfitsAmt>700000</CurrentEarningsAndProfitsAmt>
+          <CurrEarnAndPrftInUSDollarsAmt>770000</CurrEarnAndPrftInUSDollarsAmt>
+          <ExchangeRt>0.909091</ExchangeRt>
+        </IRS8858ScheduleH>
+      </IRS8858>
+    </ReturnData>
+  </SubsidiaryReturn>
+
+  <!-- FDE003: Incomplete entity PY -->
+  <SubsidiaryReturn>
+    <ReturnHeader>
+      <TaxPeriodBeginDt>2024-01-01</TaxPeriodBeginDt>
+      <TaxPeriodEndDt>2024-12-31</TaxPeriodEndDt>
+    </ReturnHeader>
+    <ReturnData>
+      <IRS8858 documentId="8858-FDE003-PY">
+        <FDEUSPersonInd>X</FDEUSPersonInd>
+        <FDEOrFBName>
+          <BusinessNameLine1Txt>INCOMPLETE FDE SA</BusinessNameLine1Txt>
+        </FDEOrFBName>
+        <ForeignEntityIdentificationGrp>
+          <ForeignEntityReferenceIdNum>FDE003</ForeignEntityReferenceIdNum>
+        </ForeignEntityIdentificationGrp>
+        <CountryEntityOrgDetail>
+          <CntryUnderWhoseLawsOrganizedCd>MX</CntryUnderWhoseLawsOrganizedCd>
+        </CountryEntityOrgDetail>
+        <FunctionalCurrencyCd>MXN</FunctionalCurrencyCd>
+        <TaxOwnerName>
+          <BusinessNameLine1Txt>TEST HOLDINGS INC</BusinessNameLine1Txt>
+        </TaxOwnerName>
+      </IRS8858>
+    </ReturnData>
+  </SubsidiaryReturn>
+
+  <!-- FDE004: Imbalanced entity PY (balance sheet matches in PY) -->
+  <SubsidiaryReturn>
+    <ReturnHeader>
+      <TaxPeriodBeginDt>2024-01-01</TaxPeriodBeginDt>
+      <TaxPeriodEndDt>2024-12-31</TaxPeriodEndDt>
+    </ReturnHeader>
+    <ReturnData>
+      <IRS8858 documentId="8858-FDE004-PY">
+        <FDEUSPersonInd>X</FDEUSPersonInd>
+        <FDEOrFBName>
+          <BusinessNameLine1Txt>IMBALANCED FDE PTY</BusinessNameLine1Txt>
+        </FDEOrFBName>
+        <ForeignEntityIdentificationGrp>
+          <ForeignEntityReferenceIdNum>FDE004</ForeignEntityReferenceIdNum>
+        </ForeignEntityIdentificationGrp>
+        <CountryEntityOrgDetail>
+          <CntryUnderWhoseLawsOrganizedCd>AS</CntryUnderWhoseLawsOrganizedCd>
+        </CountryEntityOrgDetail>
+        <FunctionalCurrencyCd>USD</FunctionalCurrencyCd>
+        <TaxOwnerName>
+          <BusinessNameLine1Txt>TEST HOLDINGS INC</BusinessNameLine1Txt>
+        </TaxOwnerName>
+        <IRS8858ScheduleF>
+          <CashAndOtherCurrentAssets>
+            <BeginningAmt>4000000</BeginningAmt>
+            <EndingAmt>5000000</EndingAmt>
+          </CashAndOtherCurrentAssets>
+          <OtherAssetsBalanceSheet>
+            <BeginningAmt>800000</BeginningAmt>
+            <EndingAmt>1000000</EndingAmt>
+          </OtherAssetsBalanceSheet>
+          <TotalAssetsBalanceSheet>
+            <BeginningAmt>4800000</BeginningAmt>
+            <EndingAmt>6000000</EndingAmt>
+          </TotalAssetsBalanceSheet>
+          <LiabilitiesBalanceSheet>
+            <BeginningAmt>1800000</BeginningAmt>
+            <EndingAmt>2000000</EndingAmt>
+          </LiabilitiesBalanceSheet>
+          <OwnerEquityBalanceSheet>
+            <BeginningAmt>3000000</BeginningAmt>
+            <EndingAmt>4000000</EndingAmt>
+          </OwnerEquityBalanceSheet>
+          <TotLiabOwnerEquityBalanceSheet>
+            <BeginningAmt>4800000</BeginningAmt>
+            <EndingAmt>6000000</EndingAmt>
+          </TotLiabOwnerEquityBalanceSheet>
+        </IRS8858ScheduleF>
+        <IRS8858ScheduleH>
+          <ForeignCYNetIncomePerBooksAmt>300000</ForeignCYNetIncomePerBooksAmt>
+          <CurrentEarningsAndProfitsAmt>300000</CurrentEarningsAndProfitsAmt>
+          <CurrEarnAndPrftInUSDollarsAmt>300000</CurrEarnAndPrftInUSDollarsAmt>
+          <ExchangeRt>1.000000</ExchangeRt>
+        </IRS8858ScheduleH>
+      </IRS8858>
+    </ReturnData>
+  </SubsidiaryReturn>
+
+  <!-- FDEDROP: Entity in PY only (triggers ROL-8858-001 when absent from CY) -->
+  <SubsidiaryReturn>
+    <ReturnHeader>
+      <TaxPeriodBeginDt>2024-01-01</TaxPeriodBeginDt>
+      <TaxPeriodEndDt>2024-12-31</TaxPeriodEndDt>
+    </ReturnHeader>
+    <ReturnData>
+      <IRS8858 documentId="8858-FDEDROP-PY">
+        <FDEUSPersonInd>X</FDEUSPersonInd>
+        <FDEOrFBName>
+          <BusinessNameLine1Txt>DROPPED FDE BV</BusinessNameLine1Txt>
+        </FDEOrFBName>
+        <ForeignEntityIdentificationGrp>
+          <ForeignEntityReferenceIdNum>FDEDROP</ForeignEntityReferenceIdNum>
+        </ForeignEntityIdentificationGrp>
+        <CountryEntityOrgDetail>
+          <CntryUnderWhoseLawsOrganizedCd>NL</CntryUnderWhoseLawsOrganizedCd>
+        </CountryEntityOrgDetail>
+        <FunctionalCurrencyCd>EUR</FunctionalCurrencyCd>
+        <TaxOwnerName>
+          <BusinessNameLine1Txt>TEST HOLDINGS INC</BusinessNameLine1Txt>
+        </TaxOwnerName>
+      </IRS8858>
+    </ReturnData>
+  </SubsidiaryReturn>
+
+</Return>

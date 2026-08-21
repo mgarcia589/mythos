@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Return xmlns="http://www.irs.gov/efile" returnVersion="2024v1.0">
+  <ReturnHeader>
+    <ReturnTs>2025-03-15T10:00:00</ReturnTs>
+    <TaxYr>2024</TaxYr>
+    <TaxPeriodBeginDt>2024-01-01</TaxPeriodBeginDt>
+    <TaxPeriodEndDt>2024-12-31</TaxPeriodEndDt>
+    <ReturnTypeCd>1120</ReturnTypeCd>
+    <Filer>
+      <EIN>111222333</EIN>
+      <BusinessName>
+        <BusinessNameLine1Txt>MIXED HOLDINGS INC</BusinessNameLine1Txt>
+      </BusinessName>
+    </Filer>
+  </ReturnHeader>
+
+  <!-- 5471 Entity: CFC001 -->
+  <SubsidiaryReturn>
+    <ReturnHeader>
+      <TaxPeriodBeginDt>2024-01-01</TaxPeriodBeginDt>
+      <TaxPeriodEndDt>2024-12-31</TaxPeriodEndDt>
+    </ReturnHeader>
+    <ReturnData>
+      <IRS5471 documentId="5471-CFC001-PY">
+        <FilerName>
+          <BusinessNameLine1Txt>MIXED HOLDINGS INC</BusinessNameLine1Txt>
+        </FilerName>
+        <ForeignEntityIdentificationGrp>
+          <ForeignEntityReferenceIdNum>CFC001</ForeignEntityReferenceIdNum>
+        </ForeignEntityIdentificationGrp>
+        <ForeignCorporation>
+          <BusinessNameLine1Txt>OFFSHORE SUB LTD</BusinessNameLine1Txt>
+        </ForeignCorporation>
+        <CountryUnderWhoseLawsIncCd>UK</CountryUnderWhoseLawsIncCd>
+        <FunctionalCurrencyCd>GBP</FunctionalCurrencyCd>
+      </IRS5471>
+      <IRS5471ScheduleH documentId="5471-CFC001-SchH-PY">
+        <ForeignEntityIdentificationGrp>
+          <ForeignEntityReferenceIdNum>CFC001</ForeignEntityReferenceIdNum>
+        </ForeignEntityIdentificationGrp>
+        <ForeignCYNetIncomePerBooksAmt>1800000</ForeignCYNetIncomePerBooksAmt>
+        <CurrentEarningsAndProfitsAmt>1800000</CurrentEarningsAndProfitsAmt>
+        <CurrEarnAndPrftInUSDollarsAmt>2300000</CurrEarnAndPrftInUSDollarsAmt>
+        <ExchangeRt>0.780000</ExchangeRt>
+      </IRS5471ScheduleH>
+      <IRS5471ScheduleF documentId="5471-CFC001-SchF-PY">
+        <ForeignEntityIdentificationGrp>
+          <ForeignEntityReferenceIdNum>CFC001</ForeignEntityReferenceIdNum>
+        </ForeignEntityIdentificationGrp>
+        <CashAndOtherAssetsBOYAmt>4000000</CashAndOtherAssetsBOYAmt>
+        <CashAndOtherAssetsEOYAmt>5000000</CashAndOtherAssetsEOYAmt>
+        <TotalAssetsBOYAmt>4000000</TotalAssetsBOYAmt>
+        <TotalAssetsEOYAmt>5000000</TotalAssetsEOYAmt>
+        <TotalLiabilitiesBOYAmt>1500000</TotalLiabilitiesBOYAmt>
+        <TotalLiabilitiesEOYAmt>2000000</TotalLiabilitiesEOYAmt>
+        <TotalShareholderEquityBOYAmt>2500000</TotalShareholderEquityBOYAmt>
+        <TotalShareholderEquityEOYAmt>3000000</TotalShareholderEquityEOYAmt>
+        <TotLiabilitiesAndEquityBOYAmt>4000000</TotLiabilitiesAndEquityBOYAmt>
+        <TotLiabilitiesAndEquityEOYAmt>5000000</TotLiabilitiesAndEquityEOYAmt>
+      </IRS5471ScheduleF>
+    </ReturnData>
+  </SubsidiaryReturn>
+
+  <!-- 8858 Entity: FDE001 -->
+  <SubsidiaryReturn>
+    <ReturnHeader>
+      <TaxPeriodBeginDt>2024-01-01</TaxPeriodBeginDt>
+      <TaxPeriodEndDt>2024-12-31</TaxPeriodEndDt>
+    </ReturnHeader>
+    <ReturnData>
+      <IRS8858 documentId="8858-FDE001-PY">
+        <FDEUSPersonInd>X</FDEUSPersonInd>
+        <FDEOrFBName>
+          <BusinessNameLine1Txt>OFFSHORE BRANCH LLC</BusinessNameLine1Txt>
+        </FDEOrFBName>
+        <ForeignEntityIdentificationGrp>
+          <ForeignEntityReferenceIdNum>FDE001</ForeignEntityReferenceIdNum>
+        </ForeignEntityIdentificationGrp>
+        <CountryEntityOrgDetail>
+          <CntryUnderWhoseLawsOrganizedCd>UK</CntryUnderWhoseLawsOrganizedCd>
+        </CountryEntityOrgDetail>
+        <FunctionalCurrencyCd>GBP</FunctionalCurrencyCd>
+        <TaxOwnerName>
+          <BusinessNameLine1Txt>MIXED HOLDINGS INC</BusinessNameLine1Txt>
+        </TaxOwnerName>
+        <IRS8858ScheduleF>
+          <CashAndOtherCurrentAssets>
+            <BeginningAmt>2500000</BeginningAmt>
+            <EndingAmt>3000000</EndingAmt>
+          </CashAndOtherCurrentAssets>
+          <OtherAssetsBalanceSheet>
+            <BeginningAmt>400000</BeginningAmt>
+            <EndingAmt>500000</EndingAmt>
+          </OtherAssetsBalanceSheet>
+          <TotalAssetsBalanceSheet>
+            <BeginningAmt>2900000</BeginningAmt>
+            <EndingAmt>3500000</EndingAmt>
+          </TotalAssetsBalanceSheet>
+          <LiabilitiesBalanceSheet>
+            <BeginningAmt>900000</BeginningAmt>
+            <EndingAmt>1000000</EndingAmt>
+          </LiabilitiesBalanceSheet>
+          <OwnerEquityBalanceSheet>
+            <BeginningAmt>2000000</BeginningAmt>
+            <EndingAmt>2500000</EndingAmt>
+          </OwnerEquityBalanceSheet>
+          <TotLiabOwnerEquityBalanceSheet>
+            <BeginningAmt>2900000</BeginningAmt>
+            <EndingAmt>3500000</EndingAmt>
+          </TotLiabOwnerEquityBalanceSheet>
+        </IRS8858ScheduleF>
+        <IRS8858ScheduleH>
+          <ForeignCYNetIncomePerBooksAmt>250000</ForeignCYNetIncomePerBooksAmt>
+          <CurrentEarningsAndProfitsAmt>250000</CurrentEarningsAndProfitsAmt>
+          <CurrEarnAndPrftInUSDollarsAmt>320000</CurrEarnAndPrftInUSDollarsAmt>
+          <ExchangeRt>0.780000</ExchangeRt>
+        </IRS8858ScheduleH>
+      </IRS8858>
+    </ReturnData>
+  </SubsidiaryReturn>
+
+</Return>

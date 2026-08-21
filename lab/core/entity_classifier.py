@@ -1,0 +1,387 @@
+"""Entity Classifier — Unified post-parse entity pipeline.
+
+Single parse → enrich → tag → expose ClassifiedEntity as the canonical profile.
+Consolidates 6 fragmented representations into one authoritative object.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from typing import Any, Optional
+
+import pandas as pd
+
+from lab.core.entity_tagger import EntityData, EntityTagger, TagResult
+
+
+@dataclass
+class ClassifiedEntity:
+    """Canonical post-parse entity representation — full Page 1 identity + classification."""
+
+    # Identity — core (always populated)
+    reference_id: str
+    entity_name: str
+    country_code: str = ""
+    functional_currency: str = ""
+    voting_stock_pct: float | None = None
+    dormant: bool = False
+    category_filers: list[str] = field(default_factory=list)
+
+    # Identity — extended (from SubsidiaryEntity / Page 1)
+    ein: str = ""
+    incorporation_date: str = ""
+    address_line1: str = ""
+    city: str = ""
+    province: str = ""
+    postal_code: str = ""
+    principal_place_of_business: str = ""
+    form_type: str = "5471"
+    document_id: str = ""
+    oit_locator: str = ""
+
+    # 8858-specific identity
+    tax_owner_name: str = ""
+    tax_owner_ref_id: str = ""
+    tax_owner_ein: str = ""
+    tax_owner_country: str = ""
+    is_fde_us_person: bool = False
+    is_fb_cfc: bool = False
+
+    # Type flags (from Registry or inferred)
+    is_insurance: bool = False
+    is_dre: bool = False
+
+    # Schedule data (prefix-stripped dicts)
+    sch_c: dict[str, Any] = field(default_factory=dict)
+    sch_e: dict[str, Any] = field(default_factory=dict)
+    sch_g: dict[str, Any] = field(default_factory=dict)
+    sch_h: dict[str, Any] = field(default_factory=dict)
+    sch_i: dict[str, Any] = field(default_factory=dict)
+    sch_i1: dict[str, Any] = field(default_factory=dict)
+    sch_j: dict[str, Any] = field(default_factory=dict)
+    sch_p: dict[str, Any] = field(default_factory=dict)
+
+    # Classification output
+    tags: set[str] = field(default_factory=set)
+    contradictions: list[tuple[str, str, str]] = field(default_factory=list)
+    tag_metadata: dict[str, Any] = field(default_factory=dict)
+
+    @property
+    def has_sch_c(self) -> bool:
+        return bool(self.sch_c)
+
+    @property
+    def has_sch_e(self) -> bool:
+        return bool(self.sch_e)
+
+    @property
+    def has_sch_g(self) -> bool:
+        return bool(self.sch_g)
+
+    @property
+    def has_sch_h(self) -> bool:
+        return bool(self.sch_h)
+
+    @property
+    def has_sch_i(self) -> bool:
+        return bool(self.sch_i)
+
+    @property
+    def has_sch_i1(self) -> bool:
+        return bool(self.sch_i1)
+
+    @property
+    def has_sch_j(self) -> bool:
+        return bool(self.sch_j)
+
+    @property
+    def has_sch_p(self) -> bool:
+        return bool(self.sch_p)
+
+    def to_entity_data(self) -> EntityData:
+        """Convert to EntityData for the tagger (lean adapter)."""
+        return EntityData(
+            reference_id=self.reference_id,
+            entity_name=self.entity_name,
+            is_dormant=self.dormant,
+            is_insurance=self.is_insurance,
+            is_dre=self.is_dre,
+            voting_stock_pct=self.voting_stock_pct,
+            sch_c=self.sch_c,
+            sch_h=self.sch_h,
+            sch_i=self.sch_i,
+            sch_i1=self.sch_i1,
+            sch_j=self.sch_j,
+            sch_g=self.sch_g,
+            sch_e=self.sch_e,
+            sch_p=self.sch_p,
+        )
+
+
+@dataclass
+class ClassificationSummary:
+    """Aggregate statistics from a classification run."""
+
+    total_entities: int = 0
+    by_tag: dict[str, int] = field(default_factory=dict)
+    by_country: dict[str, int] = field(default_factory=dict)
+    by_type: dict[str, int] = field(default_factory=dict)
+    contradictions: list[tuple[str, str, str, str]] = field(default_factory=list)
+    tested_income_count: int = 0
+    tested_loss_count: int = 0
+    dormant_count: int = 0
+
+
+@dataclass
+class ClassificationResult:
+    """Return type for the classify operation."""
+
+    success: bool
+    entities: list[ClassifiedEntity] = field(default_factory=list)
+    summary: ClassificationSummary | None = None
+    duration_ms: float = 0.0
+    message: str = ""
+
+
+class EntityClassifier:
+    """Unified entity classification pipeline.
+
+    Parses once, enriches with optional registry, applies tag rules,
+    returns ClassifiedEntity list as the canonical output.
+    """
+
+    def __init__(self, registry=None):
+        self._registry = registry
+        self._tagger = EntityTagger()
+
+    def classify(self, parser) -> list[ClassifiedEntity]:
+        """One-shot: all schedules -> all entities classified."""
+        parsed = parser.parse()
+        subsidiaries = parsed.subsidiaries
+
+        sch_h = parser.extract_form("IRS5471ScheduleH")
+        sch_i = parser.extract_form("IRS5471ScheduleI")
+        sch_i1 = parser.extract_form("IRS5471ScheduleI1")
+        sch_c = parser.extract_form("IRS5471ScheduleC")
+        sch_e = parser.extract_form("IRS5471ScheduleE")
+        sch_j = parser.extract_form("IRS5471ScheduleJ")
+        sch_p = parser.extract_form("IRS5471ScheduleP")
+
+        h_by_ref = self._index_by_ref(sch_h)
+        i_by_ref = self._index_by_ref(sch_i)
+        i1_by_ref = self._index_by_ref(sch_i1)
+        c_by_ref = self._index_by_ref(sch_c)
+        e_by_ref = self._index_by_ref(sch_e)
+        j_by_ref = self._index_by_ref(sch_j)
+        p_by_ref = self._index_by_ref(sch_p)
+
+        entities: list[ClassifiedEntity] = []
+
+        for sub in subsidiaries:
+            ref = sub.entity.reference_id
+            if not ref:
+                continue
+
+            entity = self._build_entity_from_sub(
+                sub,
+                h_by_ref, i_by_ref, i1_by_ref, c_by_ref,
+                e_by_ref, j_by_ref, p_by_ref,
+            )
+
+            self._enrich_from_registry(entity)
+            self._apply_tags(entity)
+            entities.append(entity)
+
+        return entities
+
+    def classify_single(self, parser, ref_id: str) -> ClassifiedEntity | None:
+        """Classify one entity by reference_id."""
+        all_entities = self.classify(parser)
+        for e in all_entities:
+            if e.reference_id == ref_id:
+                return e
+        return None
+
+    def build_summary(self, entities: list[ClassifiedEntity]) -> ClassificationSummary:
+        """Compute aggregate statistics from classified entities."""
+        summary = ClassificationSummary(total_entities=len(entities))
+
+        for e in entities:
+            # by_tag
+            for tag in e.tags:
+                summary.by_tag[tag] = summary.by_tag.get(tag, 0) + 1
+
+            # by_country
+            country = e.country_code or "UNKNOWN"
+            summary.by_country[country] = summary.by_country.get(country, 0) + 1
+
+            # by_type
+            if e.is_insurance:
+                t = "insurance"
+            elif e.is_dre:
+                t = "dre"
+            elif "dormant" in e.tags:
+                t = "dormant"
+            else:
+                t = "normal"
+            summary.by_type[t] = summary.by_type.get(t, 0) + 1
+
+            # contradictions
+            for tag_a, tag_b, reason in e.contradictions:
+                summary.contradictions.append((e.reference_id, tag_a, tag_b, reason))
+
+            # shortcuts
+            if "tested_income" in e.tags:
+                summary.tested_income_count += 1
+            if "tested_loss" in e.tags:
+                summary.tested_loss_count += 1
+            if "dormant" in e.tags:
+                summary.dormant_count += 1
+
+        # Sort by_tag descending
+        summary.by_tag = dict(sorted(summary.by_tag.items(), key=lambda x: -x[1]))
+
+        return summary
+
+    def _build_entity_from_sub(
+        self,
+        sub,
+        h_by_ref: dict,
+        i_by_ref: dict,
+        i1_by_ref: dict,
+        c_by_ref: dict,
+        e_by_ref: dict,
+        j_by_ref: dict,
+        p_by_ref: dict,
+    ) -> ClassifiedEntity:
+        """Assemble a ClassifiedEntity from a SubsidiaryReturn (full Page 1 identity)."""
+        ent = sub.entity
+        ref = ent.reference_id
+
+        # Voting stock — parse from string
+        voting_pct = None
+        if ent.voting_stock_pct:
+            try:
+                v = float(ent.voting_stock_pct)
+                voting_pct = v / 100.0 if v > 1 else v
+            except (TypeError, ValueError):
+                pass
+
+        # Principal place of business + document_id — from IRS5471 form data
+        ppob = ""
+        doc_id = ""
+        irs5471_form = sub.forms.get("IRS5471")
+        if irs5471_form:
+            ppob = str(irs5471_form.fields.get("IRS5471_PrincipalPlaceOfBusCountryCd", ""))
+            doc_id = irs5471_form.document_id
+
+        entity = ClassifiedEntity(
+            reference_id=ref,
+            entity_name=ent.name,
+            country_code=ent.country_code,
+            functional_currency=ent.functional_currency,
+            voting_stock_pct=voting_pct,
+            dormant=ent.dormant,
+            category_filers=list(ent.category_filers),
+            # Extended identity
+            ein=ent.ein,
+            incorporation_date=ent.incorporation_date,
+            address_line1=ent.address_line1,
+            city=ent.city,
+            province=ent.province,
+            postal_code=ent.postal_code,
+            principal_place_of_business=ppob,
+            form_type="5471",
+            document_id=doc_id,
+            oit_locator=self._extract_oit_locator(doc_id),
+            # 8858-specific
+            tax_owner_name=ent.tax_owner_name,
+            tax_owner_ref_id=ent.tax_owner_ref_id,
+            tax_owner_ein=ent.tax_owner_ein,
+            tax_owner_country=ent.tax_owner_country,
+            is_fde_us_person=ent.is_fde_us_person,
+            is_fb_cfc=ent.is_fb_cfc,
+            # Schedule data
+            sch_h=self._row_to_dict(h_by_ref.get(ref), "IRS5471ScheduleH_"),
+            sch_i=self._row_to_dict(i_by_ref.get(ref), "IRS5471ScheduleI_"),
+            sch_i1=self._row_to_dict(i1_by_ref.get(ref), "IRS5471ScheduleI1_"),
+            sch_c=self._row_to_dict(c_by_ref.get(ref), "IRS5471ScheduleC_"),
+            sch_e=self._row_to_dict(e_by_ref.get(ref), "IRS5471ScheduleE_"),
+            sch_j=self._row_to_dict(j_by_ref.get(ref), "IRS5471ScheduleJ_"),
+            sch_p=self._row_to_dict(p_by_ref.get(ref), "IRS5471ScheduleP_"),
+        )
+
+        # Detect 8858 entities by checking for tax_owner or FDE flags
+        if ent.tax_owner_name or ent.is_fde_us_person or ent.is_fb_cfc:
+            entity.form_type = "8858"
+
+        return entity
+
+    def _enrich_from_registry(self, entity: ClassifiedEntity) -> None:
+        """Enrich entity with metadata from the registry (if available)."""
+        if self._registry is None:
+            return
+
+        match = self._registry.match_by_name(entity.entity_name)
+        if match is None:
+            match = self._registry.match_by_ref_id(entity.reference_id)
+        if match is None:
+            return
+
+        entity.is_insurance = match.is_insurance
+        entity.is_dre = match.is_dre
+        if match.is_dormant:
+            entity.dormant = True
+
+    def _apply_tags(self, entity: ClassifiedEntity) -> None:
+        """Run the tagger on this entity and store results."""
+        entity_data = entity.to_entity_data()
+        result: TagResult = self._tagger.tag(entity_data)
+        entity.tags = result.tags
+        entity.contradictions = result.contradictions
+        entity.tag_metadata = result.evidence
+
+    @staticmethod
+    def _extract_oit_locator(document_id: str) -> str:
+        """Extract 6-char OIT locator from documentId.
+
+        Format: IRS5471000272I5 → prefix 'IRS5471' (7) + locator (6) + suffix
+        Locator is alphanumeric (hex-like): 000272, 00027A, 00028N
+        """
+        if not document_id or len(document_id) < 13:
+            return ""
+        # Strip prefix: IRS5471 (7 chars) or IRS8858 (7 chars)
+        if document_id.startswith(("IRS5471", "IRS8858")):
+            locator = document_id[7:13]
+        elif document_id.startswith("F5471"):
+            locator = document_id[9:15]
+        else:
+            return ""
+        if locator.isalnum():
+            return locator
+        return ""
+
+    def _index_by_ref(self, df: pd.DataFrame) -> dict[str, pd.Series]:
+        """Index a schedule DataFrame by reference_id -> first row."""
+        if df.empty:
+            return {}
+        result = {}
+        for ref in df["_reference_id"].unique():
+            if ref:
+                result[ref] = df[df["_reference_id"] == ref].iloc[0]
+        return result
+
+    def _row_to_dict(self, row: Optional[pd.Series], prefix: str) -> dict[str, Any]:
+        """Convert a DataFrame row to a schedule dict, stripping the prefix."""
+        if row is None:
+            return {}
+        d = {}
+        for col, val in row.items():
+            if isinstance(col, str) and col.startswith(prefix):
+                field_name = col[len(prefix):]
+                try:
+                    d[field_name] = float(val)
+                except (TypeError, ValueError):
+                    if val is not None:
+                        d[field_name] = val
+        return d
