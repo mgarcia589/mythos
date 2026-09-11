@@ -55,9 +55,10 @@ Future review triggers).
 
 - One more artifact to maintain per significant decision; without a second
   reviewer, keeping the practice honest is entirely self-discipline.
-- No retroactive ADRs for decisions already made before v0.7.5 (e.g. why
-  NiceGUI for the desktop UI, why the entity classifier uses 16 deterministic
-  rule tags) — the record starts now, not from v0.6.1.
+- ~~No retroactive ADRs for decisions already made before v0.7.5~~ —
+  backfilled in ADR-002 through ADR-006 (2026-09-11) for the core/ v2
+  upgrade decisions. Some earlier decisions (e.g. NiceGUI choice for the
+  desktop UI) remain undocumented.
 
 **Future review triggers:**
 

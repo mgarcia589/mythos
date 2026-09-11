@@ -98,5 +98,10 @@ Reference in text/commits as `ADR-NNN` (the prefix, not the filename).
 | # | Slug | Status | Title |
 |---|------|--------|-------|
 | 001 | [adopt-architecture-decision-records](001-adopt-architecture-decision-records.md) | Accepted | Adopt Architecture Decision Records for this project |
+| 002 | [entity-classifier-as-canonical-pipeline](002-entity-classifier-as-canonical-pipeline.md) | Accepted | EntityClassifier as the canonical entity pipeline |
+| 003 | [deterministic-rule-based-entity-tagging](003-deterministic-rule-based-entity-tagging.md) | Accepted | Deterministic rule-based entity tagging |
+| 004 | [unified-mythos-error-hierarchy](004-unified-mythos-error-hierarchy.md) | Accepted | Unified MythosError hierarchy |
+| 005 | [triple-indexed-entity-registry](005-triple-indexed-entity-registry.md) | Accepted | Triple-indexed entity registry with auto-populate |
+| 006 | [synthetic-ref-id-for-fde-entities](006-synthetic-ref-id-for-fde-entities.md) | Accepted | Synthetic ref IDs for FDE/partnership entities |
 
 Keep this table updated by hand — new ADR, new row.
