@@ -103,5 +103,8 @@ Reference in text/commits as `ADR-NNN` (the prefix, not the filename).
 | 004 | [unified-mythos-error-hierarchy](004-unified-mythos-error-hierarchy.md) | Accepted | Unified MythosError hierarchy |
 | 005 | [triple-indexed-entity-registry](005-triple-indexed-entity-registry.md) | Accepted | Triple-indexed entity registry with auto-populate |
 | 006 | [synthetic-ref-id-for-fde-entities](006-synthetic-ref-id-for-fde-entities.md) | Accepted | Synthetic ref IDs for FDE/partnership entities |
+| 007 | [layered-zero-dependency-module-architecture](007-layered-zero-dependency-module-architecture.md) | Accepted | Layered zero-dependency module architecture |
+| 008 | [nicegui-pywebview-desktop-ui](008-nicegui-pywebview-desktop-ui.md) | Accepted | NiceGUI + pywebview as desktop UI framework |
+| 009 | [check-context-dependency-injection](009-check-context-dependency-injection.md) | Accepted | CheckContext dependency injection for the check engine |
 
 Keep this table updated by hand — new ADR, new row.
