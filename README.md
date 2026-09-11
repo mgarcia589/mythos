@@ -197,12 +197,23 @@ lab/
 │   ├── layout.py           # Sidebar + navigation + frameless window
 │   └── theme.py            # Dark/light tokens, glassmorphism
 ├── core/                    # Entity classifier, tagger, tagging rules
-├── specs/                   # Design specs (framework, strategy, UX plan)
+├── specs/                   # Design specs (framework, strategy, UX plan) — the *what/how*
+├── decisions/               # Architecture Decision Records — the *why* (see below)
 ├── tests/                   # 80+ tests (unit, integration)
 │   └── fixtures/           # Synthetic XML test data (5471, 8858, 8990)
 ├── pyproject.toml
 └── requirements.txt
 ```
+
+## Architecture Decisions
+
+Significant architecture decisions (dependency choices, module boundaries,
+design tradeoffs) are recorded as ADRs in
+[`lab/decisions/`](lab/decisions/README.md) — one file per decision, with the
+context, alternatives considered, and consequences accepted. `lab/specs/`
+covers what a module does; `lab/decisions/` covers why it's built that way
+instead of another way. See [`lab/decisions/README.md`](lab/decisions/README.md)
+for when to write one and how the numbering/status lifecycle works.
 
 ## Testing
 
