@@ -403,18 +403,31 @@ class PDFExtractor:
         if not self.path.exists():
             raise FileNotFoundError(f"PDF not found: {self.path}")
         self._metrics = ExtractionMetrics()
+        self._page_filter: Optional[set[int]] = None
 
     @property
     def metrics(self) -> ExtractionMetrics:
         """Access extraction metrics from the last run."""
         return self._metrics
 
-    def extract(self) -> pd.DataFrame:
+    def _should_process_page(self, page_index: int) -> bool:
+        """Check if a page should be processed (respects page filter)."""
+        if self._page_filter is None:
+            return True
+        return page_index in self._page_filter
+
+    def extract(self, pages: Optional[list[int]] = None) -> pd.DataFrame:
         """Extract schedule data from PDF.
+
+        Args:
+            pages: Optional list of 0-indexed page numbers to process.
+                   If None, processes all pages. Used by PDFRouter to pass
+                   only the pages belonging to a specific schedule.
 
         Returns DataFrame with columns:
           entity_name, reference_id, basket, pool_name, field_name, value
         """
+        self._page_filter = set(pages) if pages is not None else None
         if self.schedule == "A":
             entities = self._extract_page1a_entities()
             return self._page1a_to_dataframe(entities)
@@ -504,6 +517,8 @@ class PDFExtractor:
             self._metrics.total_pages = len(pdf.pages)
 
             for i, page in enumerate(pdf.pages):
+                if not self._should_process_page(i):
+                    continue
                 text = page.extract_text() or ""
 
                 page_type = self._detect_page_type(text, page_in_schj)
@@ -822,6 +837,8 @@ class PDFExtractor:
             self._metrics.total_pages = len(pdf.pages)
 
             for i, page in enumerate(pdf.pages):
+                if not self._should_process_page(i):
+                    continue
                 text = page.extract_text() or ""
 
                 if not self._is_schf_page(text):
@@ -1036,6 +1053,8 @@ class PDFExtractor:
             self._metrics.total_pages = len(pdf.pages)
 
             for i, page in enumerate(pdf.pages):
+                if not self._should_process_page(i):
+                    continue
                 text = page.extract_text() or ""
 
                 if not self._is_schg_page(text):
@@ -1115,6 +1134,8 @@ class PDFExtractor:
             self._metrics.total_pages = len(pdf.pages)
 
             for i, page in enumerate(pdf.pages):
+                if not self._should_process_page(i):
+                    continue
                 text = page.extract_text() or ""
 
                 if not self._is_schh_page(text):
@@ -1165,6 +1186,8 @@ class PDFExtractor:
             self._metrics.total_pages = len(pdf.pages)
 
             for i, page in enumerate(pdf.pages):
+                if not self._should_process_page(i):
+                    continue
                 text = page.extract_text() or ""
 
                 if not self._is_schi1_page(text):
@@ -1217,6 +1240,8 @@ class PDFExtractor:
             self._metrics.total_pages = len(pdf.pages)
 
             for i, page in enumerate(pdf.pages):
+                if not self._should_process_page(i):
+                    continue
                 text = page.extract_text() or ""
 
                 if not self._is_page1a_page(text):
@@ -1368,6 +1393,8 @@ class PDFExtractor:
             self._metrics.total_pages = len(pdf.pages)
 
             for i, page in enumerate(pdf.pages):
+                if not self._should_process_page(i):
+                    continue
                 text = page.extract_text() or ""
 
                 if not self._is_schb_page(text):
@@ -1522,6 +1549,8 @@ class PDFExtractor:
             self._metrics.total_pages = len(pdf.pages)
 
             for i, page in enumerate(pdf.pages):
+                if not self._should_process_page(i):
+                    continue
                 text = page.extract_text() or ""
 
                 if not all(p.search(text) for p in SCHC_PAGE_PATTERNS):
@@ -1570,6 +1599,8 @@ class PDFExtractor:
             self._metrics.total_pages = len(pdf.pages)
 
             for i, page in enumerate(pdf.pages):
+                if not self._should_process_page(i):
+                    continue
                 text = page.extract_text() or ""
 
                 if not all(p.search(text) for p in SCHE_PAGE_PATTERNS):
@@ -1653,6 +1684,8 @@ class PDFExtractor:
             self._metrics.total_pages = len(pdf.pages)
 
             for i, page in enumerate(pdf.pages):
+                if not self._should_process_page(i):
+                    continue
                 text = page.extract_text() or ""
 
                 if not all(p.search(text) for p in SCHI_PAGE_PATTERNS):
@@ -1722,6 +1755,8 @@ class PDFExtractor:
             self._metrics.total_pages = len(pdf.pages)
 
             for i, page in enumerate(pdf.pages):
+                if not self._should_process_page(i):
+                    continue
                 text = page.extract_text() or ""
 
                 if not all(p.search(text) for p in SCHP_PAGE_PATTERNS):
@@ -1807,6 +1842,8 @@ class PDFExtractor:
             self._metrics.total_pages = len(pdf.pages)
 
             for i, page in enumerate(pdf.pages):
+                if not self._should_process_page(i):
+                    continue
                 text = page.extract_text() or ""
 
                 if not all(p.search(text) for p in SCHR_PAGE_PATTERNS):
@@ -2483,6 +2520,8 @@ class PDFExtractor:
             context = self._build_8858_entity_context(all_texts)
 
             for i, page in enumerate(pdf.pages):
+                if not self._should_process_page(i):
+                    continue
                 text = all_texts[i]
 
                 if not self._is_8858c_page(text):
@@ -2675,6 +2714,8 @@ class PDFExtractor:
             context = self._build_8858_entity_context(all_texts)
 
             for i, page in enumerate(pdf.pages):
+                if not self._should_process_page(i):
+                    continue
                 text = all_texts[i]
 
                 if not self._is_8858f_page(text):
@@ -2813,6 +2854,8 @@ class PDFExtractor:
             context = self._build_8858_entity_context(all_texts)
 
             for i, page in enumerate(pdf.pages):
+                if not self._should_process_page(i):
+                    continue
                 text = all_texts[i]
 
                 if not self._is_8858h_page(text):

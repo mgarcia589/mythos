@@ -1,9 +1,18 @@
-"""Entity registry — lookup entity metadata by code."""
+"""Entity Registry — O(1) lookup store, auto-populated from parsed XML.
+
+Replaces the old linear-scan registry with triple-indexed maps.
+Can also be populated manually or from workbooks.
+"""
+
+from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 import pandas as pd
+
+if TYPE_CHECKING:
+    from lab.xml_parser.parser import EFileParser
 
 
 @dataclass
@@ -19,10 +28,152 @@ class Entity:
     is_dre: bool = False
     fx_rate: float = 1.0
     ein_ref: str = ""
+    form_type: str = "5471"
 
 
-# Sample entity data for testing and demo purposes
-SAMPLE_ENTITIES = [
+class EntityRegistry:
+    """Entity lookup service with O(1) indexed access.
+
+    Three indexes maintained on every mutation:
+      _by_ref:  reference_id / ein_ref → Entity
+      _by_name: normalized name        → Entity
+      _by_code: code                   → Entity
+    """
+
+    def __init__(self, entities: Optional[list[Entity]] = None):
+        self._by_ref: dict[str, Entity] = {}
+        self._by_name: dict[str, Entity] = {}
+        self._by_code: dict[str, Entity] = {}
+        if entities:
+            for e in entities:
+                self._register(e)
+
+    @property
+    def count(self) -> int:
+        return len(self._by_code)
+
+    def _register(self, entity: Entity) -> None:
+        ref_key = entity.ein_ref or entity.code
+        if ref_key:
+            self._by_ref[ref_key] = entity
+        if entity.name:
+            self._by_name[entity.name.lower().strip()] = entity
+        self._by_code[entity.code] = entity
+
+    def register(self, entity: Entity) -> None:
+        self._register(entity)
+
+    def populate_from_parser(self, parser: EFileParser) -> int:
+        """Auto-populate registry from parsed XML subsidiaries.
+
+        Extracts identity from each SubsidiaryReturn and indexes it.
+        Returns count of entities registered.
+        """
+        parsed = parser.parse()
+        for sub in parsed.subsidiaries:
+            ent = sub.entity
+            ref_id = ent.reference_id
+            if not ref_id:
+                continue
+
+            forms = list(sub.forms.keys())
+            has_8858 = any("8858" in f for f in forms)
+            has_5471 = any("5471" in f for f in forms)
+
+            form_type = "5471"
+            if has_8858 and not has_5471:
+                form_type = "8858"
+            elif has_8858 and has_5471:
+                form_type = "5471"
+
+            entity = Entity(
+                code=ref_id,
+                name=ent.name,
+                fc=ent.functional_currency,
+                country=ent.country_code,
+                deal="",
+                entity_type="FDE" if form_type == "8858" else "Subsidiary",
+                is_dormant=ent.dormant,
+                ein_ref=ref_id,
+                form_type=form_type,
+            )
+            self._register(entity)
+        return self.count
+
+    def match_by_ref_id(self, ref_id: str) -> Optional[Entity]:
+        if not ref_id:
+            return None
+        return self._by_ref.get(ref_id)
+
+    def match_by_name(self, name: str) -> Optional[Entity]:
+        if not name:
+            return None
+        key = name.lower().strip()
+        hit = self._by_name.get(key)
+        if hit:
+            return hit
+        for stored_name, entity in self._by_name.items():
+            if stored_name in key or key in stored_name:
+                return entity
+        return None
+
+    def get(self, code: str) -> Optional[Entity]:
+        return self._by_code.get(code)
+
+    def __getitem__(self, code: str) -> Entity:
+        if code not in self._by_code:
+            raise KeyError(f"Entity {code} not found in registry")
+        return self._by_code[code]
+
+    def __contains__(self, code: str) -> bool:
+        return code in self._by_code
+
+    def __len__(self) -> int:
+        return len(self._by_code)
+
+    @property
+    def all_codes(self) -> list[str]:
+        return list(self._by_code.keys())
+
+    @property
+    def insurance_codes(self) -> list[str]:
+        return [c for c, e in self._by_code.items() if e.is_insurance]
+
+    @property
+    def non_insurance_codes(self) -> list[str]:
+        return [c for c, e in self._by_code.items() if not e.is_insurance and not e.is_dre]
+
+    @property
+    def dre_codes(self) -> list[str]:
+        return [c for c, e in self._by_code.items() if e.is_dre]
+
+    def by_deal(self, deal: str) -> list[Entity]:
+        return [e for e in self._by_code.values() if e.deal == deal]
+
+    def by_country(self, country: str) -> list[Entity]:
+        return [e for e in self._by_code.values() if e.country == country]
+
+    def by_currency(self, fc: str) -> list[Entity]:
+        return [e for e in self._by_code.values() if e.fc == fc]
+
+    def by_form_type(self, form_type: str) -> list[Entity]:
+        return [e for e in self._by_code.values() if e.form_type == form_type]
+
+    def to_dataframe(self) -> pd.DataFrame:
+        return pd.DataFrame([vars(e) for e in self._by_code.values()])
+
+    def clear(self) -> None:
+        self._by_ref.clear()
+        self._by_name.clear()
+        self._by_code.clear()
+
+    @classmethod
+    def sample(cls) -> "EntityRegistry":
+        """Create registry pre-loaded with sample entities for testing/demo."""
+        return cls(_SAMPLE_ENTITIES)
+
+
+_SAMPLE_ENTITIES = [
     Entity("E001", "Alpha TopCo Ltd", "USD", "JE", "Portfolio-A"),
     Entity("E002", "Alpha MidCo Limited", "USD", "JE", "Portfolio-A"),
     Entity("E003", "Alpha Holdings Limited", "USD", "JE", "Portfolio-A"),
@@ -60,87 +211,3 @@ SAMPLE_ENTITIES = [
     Entity("E035", "Alpha Asia PTE Limited (Australia branch)", "AUD", "AU", "Portfolio-A", is_dre=True),
     Entity("E036", "Gamma Holdings Ltd", "USD", "JE", "Portfolio-A"),
 ]
-
-
-class EntityRegistry:
-    """Entity lookup service."""
-
-    def __init__(self, entities: Optional[list[Entity]] = None):
-        self._entities: dict[str, Entity] = {}
-        if entities:
-            for e in entities:
-                self._entities[e.code] = e
-
-    def match_by_ref_id(self, ref_id: str) -> Optional[Entity]:
-        """Lookup entity by EIN reference (ein_ref field)."""
-        if not ref_id:
-            return None
-        for e in self._entities.values():
-            if e.ein_ref and e.ein_ref == ref_id:
-                return e
-        return None
-
-    def match_by_name(self, name: str) -> Optional[Entity]:
-        """Lookup entity by name (case-insensitive substring match)."""
-        if not name:
-            return None
-        name_lower = name.lower().strip()
-        for e in self._entities.values():
-            if e.name.lower().strip() == name_lower:
-                return e
-        # Fallback: substring containment
-        for e in self._entities.values():
-            if e.name.lower().strip() in name_lower or name_lower in e.name.lower().strip():
-                return e
-        return None
-
-    @classmethod
-    def sample(cls) -> "EntityRegistry":
-        """Create registry pre-loaded with sample entities for testing/demo."""
-        return cls(SAMPLE_ENTITIES)
-
-    def get(self, code: str) -> Optional[Entity]:
-        return self._entities.get(code)
-
-    def __getitem__(self, code: str) -> Entity:
-        if code not in self._entities:
-            raise KeyError(f"Entity {code} not found in registry")
-        return self._entities[code]
-
-    def __contains__(self, code: str) -> bool:
-        return code in self._entities
-
-    @property
-    def all_codes(self) -> list[str]:
-        return list(self._entities.keys())
-
-    @property
-    def insurance_codes(self) -> list[str]:
-        return [c for c, e in self._entities.items() if e.is_insurance]
-
-    @property
-    def non_insurance_codes(self) -> list[str]:
-        return [c for c, e in self._entities.items() if not e.is_insurance and not e.is_dre]
-
-    @property
-    def dre_codes(self) -> list[str]:
-        return [c for c, e in self._entities.items() if e.is_dre]
-
-    def by_deal(self, deal: str) -> list[Entity]:
-        return [e for e in self._entities.values() if e.deal == deal]
-
-    def by_country(self, country: str) -> list[Entity]:
-        return [e for e in self._entities.values() if e.country == country]
-
-    def by_currency(self, fc: str) -> list[Entity]:
-        return [e for e in self._entities.values() if e.fc == fc]
-
-    def to_dataframe(self) -> pd.DataFrame:
-        return pd.DataFrame([vars(e) for e in self._entities.values()])
-
-    def load_from_workbook(self, xlsx_reader, sheet_name: str = "Entity Listing"):
-        """Load entities from workbook's Entity Listing sheet."""
-        rows_data, _ = xlsx_reader.read_sheet(sheet_name)
-        # Implementation depends on exact sheet structure
-        # Will be refined once workbook is re-ingested
-        pass

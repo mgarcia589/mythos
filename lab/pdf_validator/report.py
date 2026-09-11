@@ -14,6 +14,7 @@ from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 
 from lab.pdf_validator.reconciler import PDFValidationReport, PDFDiscrepancy
+from lab.pdf_validator.models import BatchValidationResult
 
 # Report styling
 ACCENT_COLOR = "D04A02"
@@ -170,3 +171,138 @@ def _write_discrepancy_table(ws, items: list[PDFDiscrepancy], start_row: int) ->
         ws.column_dimensions[get_column_letter(c)].width = w
 
     return row
+
+
+# ─── Batch / Consolidated Report ─────────────────────────────────────────────
+
+
+def write_batch_report_excel(
+    result: BatchValidationResult,
+    output_path: Path | str,
+    client_name: str = "Sample Client LP",
+    engagement: str = "FY25 International Tax Compliance",
+) -> Path:
+    """Generate consolidated Excel report from batch validation."""
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    wb = Workbook()
+
+    # === Sheet 1: Dashboard ===
+    ws = wb.active
+    ws.title = "Dashboard"
+    _write_header(ws, client_name, engagement,
+                  "Batch PDF Validation — All Schedules",
+                  f"PDF: {result.pdf_source} | XML: {result.xml_source}")
+
+    row = 8
+    ws.cell(row=row, column=1, value="OVERVIEW").font = Font(bold=True, size=11)
+    row += 1
+
+    duration = f"{result.duration_seconds:.1f}s" if result.duration_seconds else "N/A"
+    entities = result.page_map.entity_count if result.page_map else 0
+    schedules = len(result.schedule_reports)
+
+    for label, value in [
+        ("Entities in PDF", entities),
+        ("Schedules Validated", schedules),
+        ("Total Comparisons", result.total_comparisons),
+        ("Total Discrepancies", result.total_discrepancies),
+        ("Phantoms (PDF not in XML)", result.total_phantoms),
+        ("Duration", duration),
+    ]:
+        ws.cell(row=row, column=1, value=label).font = Font(bold=True, size=10)
+        cell = ws.cell(row=row, column=2, value=value)
+        cell.font = Font(size=10)
+        if "Phantom" in label and isinstance(value, int) and value > 0:
+            cell.font = PHANTOM_FONT
+        row += 1
+
+    # Entity completeness
+    if result.entity_completeness:
+        row += 1
+        ws.cell(row=row, column=1, value="ENTITY COMPLETENESS").font = Font(bold=True, size=11)
+        row += 1
+        ec = result.entity_completeness
+        ws.cell(row=row, column=1, value=f"XML entities: {len(ec.xml_entities)}")
+        row += 1
+        ws.cell(row=row, column=1, value=f"PDF entities: {len(ec.pdf_entities)}")
+        row += 1
+        ws.cell(row=row, column=1, value=f"Matched: {len(ec.matched)}")
+        row += 1
+        if ec.missing_from_pdf:
+            ws.cell(row=row, column=1, value="Missing from PDF:").font = PHANTOM_FONT
+            ws.cell(row=row, column=2, value=", ".join(sorted(ec.missing_from_pdf))).font = PHANTOM_FONT
+            row += 1
+        if ec.extra_in_pdf:
+            ws.cell(row=row, column=1, value="Extra in PDF (not in XML):").font = MISSING_FONT
+            ws.cell(row=row, column=2, value=", ".join(sorted(ec.extra_in_pdf))).font = MISSING_FONT
+            row += 1
+
+    # Schedule-by-schedule summary table
+    row += 1
+    ws.cell(row=row, column=1, value="PER-SCHEDULE RESULTS").font = Font(bold=True, size=11)
+    row += 1
+    sch_headers = ["Schedule", "Comparisons", "OK", "Phantom", "Missing", "Mismatch", "Entities"]
+    for c, h in enumerate(sch_headers, 1):
+        cell = ws.cell(row=row, column=c, value=h)
+        cell.fill = HEADER_FILL
+        cell.font = HEADER_FONT
+        cell.alignment = Alignment(horizontal="center")
+    row += 1
+
+    for sch_key in sorted(result.schedule_reports.keys()):
+        report = result.schedule_reports[sch_key]
+        ws.cell(row=row, column=1, value=f"Schedule {sch_key}").font = Font(bold=True, size=10)
+        ws.cell(row=row, column=2, value=report.total_comparisons)
+        ws.cell(row=row, column=3, value=report.ok_count)
+
+        p_cell = ws.cell(row=row, column=4, value=report.phantom_count)
+        if report.phantom_count > 0:
+            p_cell.font = PHANTOM_FONT
+            p_cell.fill = PHANTOM_FILL
+
+        m_cell = ws.cell(row=row, column=5, value=report.missing_count)
+        if report.missing_count > 0:
+            m_cell.font = MISSING_FONT
+
+        mm_cell = ws.cell(row=row, column=6, value=report.mismatch_count)
+        if report.mismatch_count > 0:
+            mm_cell.font = MISMATCH_FONT
+
+        ws.cell(row=row, column=7, value=report.entities_checked)
+        row += 1
+
+    ws.column_dimensions["A"].width = 28
+    ws.column_dimensions["B"].width = 55
+
+    # === Per-schedule discrepancy sheets ===
+    for sch_key in sorted(result.schedule_reports.keys()):
+        report = result.schedule_reports[sch_key]
+        if not report.discrepancies:
+            continue
+
+        sheet_name = f"Sch {sch_key}"[:31]
+        ws_sch = wb.create_sheet(sheet_name)
+        _write_header(ws_sch, client_name, engagement,
+                      f"Schedule {sch_key} — Discrepancies",
+                      f"{len(report.discrepancies)} issues across "
+                      f"{len(report.entities_with_issues)} entities")
+        _write_discrepancy_table(ws_sch, report.discrepancies, 8)
+        ws_sch.column_dimensions["A"].width = 28
+
+    # === All Discrepancies sheet ===
+    all_discreps = []
+    for report in result.schedule_reports.values():
+        all_discreps.extend(report.discrepancies)
+
+    if all_discreps:
+        ws_all = wb.create_sheet("All Discrepancies")
+        _write_header(ws_all, client_name, engagement,
+                      "All Discrepancies — All Schedules",
+                      f"{len(all_discreps)} total across {schedules} schedules")
+        _write_discrepancy_table(ws_all, all_discreps, 8)
+        ws_all.column_dimensions["A"].width = 28
+
+    wb.save(str(output_path))
+    return output_path

@@ -1,4 +1,8 @@
-"""Tests for Entity Classifier — unified pipeline, summary, adapters, registry enrichment."""
+"""Tests for Entity Classifier — unified pipeline, summary, adapters, registry enrichment.
+
+v2: Added tests for O(1) registry lookups, populate_from_parser, cache,
+    completeness scoring, and avg_completeness in summary.
+"""
 
 import sys
 from pathlib import Path
@@ -106,6 +110,9 @@ class TestClassifiedEntity:
         assert e.contradictions == []
         assert e.oit_locator == ""
         assert e.document_id == ""
+        assert e.completeness_score == 0.0
+        assert e.missing_schedules == []
+        assert e.present_schedules == []
 
 
 # ─── TEST: OIT LOCATOR EXTRACTION ───────────────────────────────────────────
@@ -210,6 +217,25 @@ class TestClassifierPipeline:
         cities = [e.city for e in entities if e.city]
         assert len(set(cities)) > 1
 
+    def test_completeness_populated(self, classifier, sample_parser):
+        entities = classifier.classify(sample_parser)
+        for e in entities:
+            assert 0.0 <= e.completeness_score <= 1.0
+            assert isinstance(e.present_schedules, list)
+            assert isinstance(e.missing_schedules, list)
+
+    def test_cache_returns_same_list(self, classifier, sample_parser):
+        first = classifier.classify(sample_parser)
+        second = classifier.classify(sample_parser)
+        assert first is second
+
+    def test_invalidate_cache(self, classifier, sample_parser):
+        first = classifier.classify(sample_parser)
+        classifier.invalidate_cache(sample_parser)
+        second = classifier.classify(sample_parser)
+        assert first is not second
+        assert len(first) == len(second)
+
 
 # ─── TEST: CLASSIFICATION SUMMARY ───────────────────────────────────────────
 
@@ -269,6 +295,15 @@ class TestClassificationSummary:
         assert summary.by_tag == {}
         assert summary.by_country == {}
         assert summary.tested_income_count == 0
+        assert summary.avg_completeness == 0.0
+
+    def test_summary_avg_completeness(self, classifier):
+        entities = [
+            ClassifiedEntity(reference_id="E1", entity_name="A", completeness_score=1.0),
+            ClassifiedEntity(reference_id="E2", entity_name="B", completeness_score=0.5),
+        ]
+        summary = classifier.build_summary(entities)
+        assert summary.avg_completeness == 0.75
 
 
 # ─── TEST: REGISTRY ENRICHMENT ──────────────────────────────────────────────
@@ -329,6 +364,139 @@ class TestRegistryEnrichment:
         entity = ClassifiedEntity(reference_id="X", entity_name="Test")
         classifier._enrich_from_registry(entity)
         assert entity.is_insurance is False
+
+
+# ─── TEST: ENTITY REGISTRY v2 — O(1) LOOKUPS + POPULATE ───────────────────
+
+
+class TestEntityRegistryV2:
+    def test_o1_match_by_ref_id(self):
+        registry = EntityRegistry([
+            Entity("T001", "Test Corp", "USD", "US", "Deal", ein_ref="REF123"),
+        ])
+        result = registry.match_by_ref_id("REF123")
+        assert result is not None
+        assert result.name == "Test Corp"
+
+    def test_o1_match_by_name_exact(self):
+        registry = EntityRegistry([
+            Entity("T001", "Test Corp", "USD", "US", "Deal"),
+        ])
+        result = registry.match_by_name("Test Corp")
+        assert result is not None
+        assert result.code == "T001"
+
+    def test_match_by_name_case_insensitive(self):
+        registry = EntityRegistry([
+            Entity("T001", "Test Corp", "USD", "US", "Deal"),
+        ])
+        result = registry.match_by_name("TEST CORP")
+        assert result is not None
+
+    def test_match_by_name_substring_fallback(self):
+        registry = EntityRegistry([
+            Entity("T001", "Test Insurance Co", "USD", "BD", "Deal"),
+        ])
+        result = registry.match_by_name("Test Insurance Co Subsidiary")
+        assert result is not None
+        assert result.code == "T001"
+
+    def test_match_by_name_empty(self):
+        registry = EntityRegistry([Entity("T001", "Corp", "USD", "US", "Deal")])
+        assert registry.match_by_name("") is None
+
+    def test_match_by_ref_id_empty(self):
+        registry = EntityRegistry([Entity("T001", "Corp", "USD", "US", "Deal")])
+        assert registry.match_by_ref_id("") is None
+
+    def test_match_not_found(self):
+        registry = EntityRegistry([Entity("T001", "Corp A", "USD", "US", "Deal")])
+        assert registry.match_by_name("Completely Different") is None
+        assert registry.match_by_ref_id("NOPE") is None
+
+    def test_register_updates_all_indexes(self):
+        registry = EntityRegistry()
+        registry.register(Entity("NEW1", "New Corp", "EUR", "DE", "DealX", ein_ref="REF_NEW"))
+        assert registry.get("NEW1") is not None
+        assert registry.match_by_name("New Corp") is not None
+        assert registry.match_by_ref_id("REF_NEW") is not None
+        assert registry.count == 1
+
+    def test_register_upsert_last_wins(self):
+        registry = EntityRegistry()
+        registry.register(Entity("C1", "Alpha Corp", "USD", "US", "D1"))
+        registry.register(Entity("C1", "Alpha Corp Updated", "EUR", "DE", "D2"))
+        result = registry.get("C1")
+        assert result.name == "Alpha Corp Updated"
+        assert result.fc == "EUR"
+
+    def test_count_and_len(self):
+        registry = EntityRegistry([
+            Entity("A", "A Corp", "USD", "US", "D"),
+            Entity("B", "B Corp", "USD", "US", "D"),
+        ])
+        assert registry.count == 2
+        assert len(registry) == 2
+
+    def test_clear(self):
+        registry = EntityRegistry.sample()
+        assert registry.count > 0
+        registry.clear()
+        assert registry.count == 0
+        assert registry.match_by_name("Alpha TopCo Ltd") is None
+
+    def test_by_form_type(self):
+        registry = EntityRegistry([
+            Entity("A", "Corp 5471", "USD", "US", "D", form_type="5471"),
+            Entity("B", "FDE 8858", "EUR", "DE", "D", form_type="8858"),
+        ])
+        assert len(registry.by_form_type("5471")) == 1
+        assert len(registry.by_form_type("8858")) == 1
+
+    def test_contains_and_getitem(self):
+        registry = EntityRegistry([Entity("X1", "Test", "USD", "US", "D")])
+        assert "X1" in registry
+        assert "X2" not in registry
+        assert registry["X1"].name == "Test"
+        with pytest.raises(KeyError):
+            _ = registry["X2"]
+
+    def test_sample_factory(self):
+        registry = EntityRegistry.sample()
+        assert registry.count == 36
+        assert registry.match_by_name("Alpha TopCo Ltd") is not None
+
+
+@pytest.mark.skipif(not SAMPLE_CY.exists(), reason="Fixture not available")
+class TestRegistryPopulateFromParser:
+    def test_populate_returns_count(self):
+        from lab.xml_parser.parser import EFileParser
+        parser = EFileParser(SAMPLE_CY)
+        registry = EntityRegistry()
+        count = registry.populate_from_parser(parser)
+        assert count > 0
+
+    def test_populated_entities_are_findable(self):
+        from lab.xml_parser.parser import EFileParser
+        parser = EFileParser(SAMPLE_CY)
+        registry = EntityRegistry()
+        registry.populate_from_parser(parser)
+        parsed = parser.parse()
+        for sub in parsed.subsidiaries:
+            ref = sub.entity.reference_id
+            if ref:
+                assert registry.match_by_ref_id(ref) is not None
+
+    def test_populated_entity_has_metadata(self):
+        from lab.xml_parser.parser import EFileParser
+        parser = EFileParser(SAMPLE_CY)
+        registry = EntityRegistry()
+        registry.populate_from_parser(parser)
+        e = registry.match_by_ref_id("E001")
+        assert e is not None
+        assert e.name
+        assert e.country
+        assert e.fc
 
 
 # ─── TEST: ENTITY REGISTRY BRIDGE METHODS ───────────────────────────────────
@@ -425,6 +593,98 @@ class TestTagConsistency:
         )
         classifier._apply_tags(entity)
         assert "full_inclusion" not in entity.tags
+
+
+# ─── TEST: COMPLETENESS SCORING ─────────────────────────────────────────────
+
+
+class TestCompletenessScoring:
+    def test_full_5471_all_schedules(self):
+        entity = ClassifiedEntity(
+            reference_id="E1", entity_name="Full Corp", form_type="5471",
+            sch_c={"x": 1}, sch_e={"x": 1}, sch_h={"x": 1},
+            sch_i={"x": 1}, sch_i1={"x": 1}, sch_j={"x": 1}, sch_p={"x": 1},
+        )
+        EntityClassifier._compute_completeness(entity)
+        assert entity.completeness_score == 1.0
+        assert entity.missing_schedules == []
+        assert len(entity.present_schedules) == 7
+
+    def test_5471_missing_some(self):
+        entity = ClassifiedEntity(
+            reference_id="E1", entity_name="Partial Corp", form_type="5471",
+            sch_c={"x": 1}, sch_h={"x": 1}, sch_j={"x": 1},
+        )
+        EntityClassifier._compute_completeness(entity)
+        assert 0.0 < entity.completeness_score < 1.0
+        assert "e" in entity.missing_schedules
+        assert "i" in entity.missing_schedules
+        assert "i1" in entity.missing_schedules
+        assert "p" in entity.missing_schedules
+
+    def test_5471_dormant_only_h_j_expected(self):
+        entity = ClassifiedEntity(
+            reference_id="E1", entity_name="Dormant Corp",
+            form_type="5471", dormant=True,
+            sch_h={"x": 1}, sch_j={"x": 1},
+        )
+        EntityClassifier._compute_completeness(entity)
+        assert entity.completeness_score == 1.0
+        assert entity.missing_schedules == []
+
+    def test_dormant_missing_j(self):
+        entity = ClassifiedEntity(
+            reference_id="E1", entity_name="Dormant Corp",
+            form_type="5471", dormant=True,
+            sch_h={"x": 1},
+        )
+        EntityClassifier._compute_completeness(entity)
+        assert entity.completeness_score == 0.5
+        assert "j" in entity.missing_schedules
+
+    def test_8858_expects_c_f_h(self):
+        entity = ClassifiedEntity(
+            reference_id="E1", entity_name="FDE",
+            form_type="8858",
+            sch_c={"x": 1}, sch_f={"x": 1}, sch_h={"x": 1},
+        )
+        EntityClassifier._compute_completeness(entity)
+        assert entity.completeness_score == 1.0
+
+    def test_8858_missing_f(self):
+        entity = ClassifiedEntity(
+            reference_id="E1", entity_name="FDE",
+            form_type="8858",
+            sch_c={"x": 1}, sch_h={"x": 1},
+        )
+        EntityClassifier._compute_completeness(entity)
+        assert entity.completeness_score == pytest.approx(0.667, abs=0.01)
+        assert "f" in entity.missing_schedules
+
+    def test_empty_entity_zero_score(self):
+        entity = ClassifiedEntity(
+            reference_id="E1", entity_name="Empty", form_type="5471",
+        )
+        EntityClassifier._compute_completeness(entity)
+        assert entity.completeness_score == 0.0
+        assert len(entity.missing_schedules) == 7
+
+
+# ─── TEST: CLASSIFICATION CACHE ─────────────────────────────────────────────
+
+
+class TestClassificationCache:
+    def test_cache_invalidate_all(self, classifier):
+        classifier._cache["fake_key"] = [ClassifiedEntity(reference_id="X", entity_name="X")]
+        classifier.invalidate_cache()
+        assert classifier._cache == {}
+
+    def test_cache_invalidate_specific(self, classifier):
+        classifier._cache["path_a"] = []
+        classifier._cache["path_b"] = []
+        classifier.invalidate_cache(type("P", (), {"path": "path_a"})())
+        assert "path_a" not in classifier._cache
+        assert "path_b" in classifier._cache
 
 
 # ─── TEST: FULL INTEGRATION (SERVICE) ───────────────────────────────────────

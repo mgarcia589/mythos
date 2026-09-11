@@ -20,6 +20,13 @@ from lab.pdf_validator.models import ExecutionResult, ProgressCallback, Validati
 from lab.pdf_validator.config import PDFValidatorConfig
 from lab.pdf_validator.scanner import PDFScanner, ScanResult, EntityInfo
 from lab.pdf_validator.comparator import PDFComparator, PDFComparisonReport, ComparisonItem
+from lab.pdf_validator.router import PDFRouter
+from lab.pdf_validator.models import (
+    BatchValidationResult,
+    EntityBlock,
+    EntityCompleteness,
+    PageMap,
+)
 
 __all__ = [
     "PDFValidator",
@@ -36,6 +43,11 @@ __all__ = [
     "PDFComparator",
     "PDFComparisonReport",
     "ComparisonItem",
+    "PDFRouter",
+    "BatchValidationResult",
+    "EntityBlock",
+    "EntityCompleteness",
+    "PageMap",
     "ALL_POOLS",
     "POOL_LOOKUP",
     "SKIP_POOLS",

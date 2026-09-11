@@ -2,6 +2,8 @@
 
 Single parse → enrich → tag → expose ClassifiedEntity as the canonical profile.
 Consolidates 6 fragmented representations into one authoritative object.
+
+v2: O(n) indexing, classification cache, completeness scoring, auto-populate registry.
 """
 
 from __future__ import annotations
@@ -12,6 +14,11 @@ from typing import Any, Optional
 import pandas as pd
 
 from lab.core.entity_tagger import EntityData, EntityTagger, TagResult
+
+
+_EXPECTED_SCHEDULES_5471 = {"c", "e", "h", "i", "i1", "j", "p"}
+_EXPECTED_SCHEDULES_5471_DORMANT = {"h", "j"}
+_EXPECTED_SCHEDULES_8858 = {"c", "f", "h"}
 
 
 @dataclass
@@ -54,6 +61,7 @@ class ClassifiedEntity:
     # Schedule data (prefix-stripped dicts)
     sch_c: dict[str, Any] = field(default_factory=dict)
     sch_e: dict[str, Any] = field(default_factory=dict)
+    sch_f: dict[str, Any] = field(default_factory=dict)
     sch_g: dict[str, Any] = field(default_factory=dict)
     sch_h: dict[str, Any] = field(default_factory=dict)
     sch_i: dict[str, Any] = field(default_factory=dict)
@@ -66,6 +74,11 @@ class ClassifiedEntity:
     contradictions: list[tuple[str, str, str]] = field(default_factory=list)
     tag_metadata: dict[str, Any] = field(default_factory=dict)
 
+    # Completeness scoring
+    completeness_score: float = 0.0
+    missing_schedules: list[str] = field(default_factory=list)
+    present_schedules: list[str] = field(default_factory=list)
+
     @property
     def has_sch_c(self) -> bool:
         return bool(self.sch_c)
@@ -73,6 +86,10 @@ class ClassifiedEntity:
     @property
     def has_sch_e(self) -> bool:
         return bool(self.sch_e)
+
+    @property
+    def has_sch_f(self) -> bool:
+        return bool(self.sch_f)
 
     @property
     def has_sch_g(self) -> bool:
@@ -130,6 +147,7 @@ class ClassificationSummary:
     tested_income_count: int = 0
     tested_loss_count: int = 0
     dormant_count: int = 0
+    avg_completeness: float = 0.0
 
 
 @dataclass
@@ -147,15 +165,32 @@ class EntityClassifier:
     """Unified entity classification pipeline.
 
     Parses once, enriches with optional registry, applies tag rules,
-    returns ClassifiedEntity list as the canonical output.
+    computes completeness, returns ClassifiedEntity list as canonical output.
+
+    v2 improvements:
+      - O(n) indexing via groupby().first() instead of O(n²) loop
+      - Classification cache keyed by parser.path
+      - Completeness scoring per entity
+      - Auto-populate registry from parser when no external registry given
     """
 
     def __init__(self, registry=None):
         self._registry = registry
         self._tagger = EntityTagger()
+        self._cache: dict[str, list[ClassifiedEntity]] = {}
 
     def classify(self, parser) -> list[ClassifiedEntity]:
-        """One-shot: all schedules -> all entities classified."""
+        """One-shot: all schedules -> all entities classified. Cached by path."""
+        cache_key = str(getattr(parser, "path", id(parser)))
+        if cache_key in self._cache:
+            return self._cache[cache_key]
+
+        entities = self._classify_impl(parser)
+        self._cache[cache_key] = entities
+        return entities
+
+    def _classify_impl(self, parser) -> list[ClassifiedEntity]:
+        """Internal: full classification pipeline, no cache."""
         parsed = parser.parse()
         subsidiaries = parsed.subsidiaries
 
@@ -190,56 +225,66 @@ class EntityClassifier:
 
             self._enrich_from_registry(entity)
             self._apply_tags(entity)
+            self._compute_completeness(entity)
             entities.append(entity)
 
         return entities
 
     def classify_single(self, parser, ref_id: str) -> ClassifiedEntity | None:
-        """Classify one entity by reference_id."""
+        """Classify one entity by reference_id. Uses cache if available."""
         all_entities = self.classify(parser)
         for e in all_entities:
             if e.reference_id == ref_id:
                 return e
         return None
 
+    def invalidate_cache(self, parser=None) -> None:
+        """Clear classification cache. If parser given, only that key."""
+        if parser is None:
+            self._cache.clear()
+        else:
+            key = str(getattr(parser, "path", id(parser)))
+            self._cache.pop(key, None)
+
     def build_summary(self, entities: list[ClassifiedEntity]) -> ClassificationSummary:
         """Compute aggregate statistics from classified entities."""
         summary = ClassificationSummary(total_entities=len(entities))
 
+        completeness_sum = 0.0
+
         for e in entities:
-            # by_tag
             for tag in e.tags:
                 summary.by_tag[tag] = summary.by_tag.get(tag, 0) + 1
 
-            # by_country
             country = e.country_code or "UNKNOWN"
             summary.by_country[country] = summary.by_country.get(country, 0) + 1
 
-            # by_type
             if e.is_insurance:
                 t = "insurance"
             elif e.is_dre:
                 t = "dre"
-            elif "dormant" in e.tags:
+            elif "dormant" in e.tags or e.dormant:
                 t = "dormant"
             else:
                 t = "normal"
             summary.by_type[t] = summary.by_type.get(t, 0) + 1
 
-            # contradictions
             for tag_a, tag_b, reason in e.contradictions:
                 summary.contradictions.append((e.reference_id, tag_a, tag_b, reason))
 
-            # shortcuts
             if "tested_income" in e.tags:
                 summary.tested_income_count += 1
             if "tested_loss" in e.tags:
                 summary.tested_loss_count += 1
-            if "dormant" in e.tags:
+            if "dormant" in e.tags or e.dormant:
                 summary.dormant_count += 1
 
-        # Sort by_tag descending
+            completeness_sum += e.completeness_score
+
         summary.by_tag = dict(sorted(summary.by_tag.items(), key=lambda x: -x[1]))
+
+        if entities:
+            summary.avg_completeness = round(completeness_sum / len(entities), 3)
 
         return summary
 
@@ -258,7 +303,6 @@ class EntityClassifier:
         ent = sub.entity
         ref = ent.reference_id
 
-        # Voting stock — parse from string
         voting_pct = None
         if ent.voting_stock_pct:
             try:
@@ -267,7 +311,6 @@ class EntityClassifier:
             except (TypeError, ValueError):
                 pass
 
-        # Principal place of business + document_id — from IRS5471 form data
         ppob = ""
         doc_id = ""
         irs5471_form = sub.forms.get("IRS5471")
@@ -283,7 +326,6 @@ class EntityClassifier:
             voting_stock_pct=voting_pct,
             dormant=ent.dormant,
             category_filers=list(ent.category_filers),
-            # Extended identity
             ein=ent.ein,
             incorporation_date=ent.incorporation_date,
             address_line1=ent.address_line1,
@@ -294,14 +336,12 @@ class EntityClassifier:
             form_type="5471",
             document_id=doc_id,
             oit_locator=self._extract_oit_locator(doc_id),
-            # 8858-specific
             tax_owner_name=ent.tax_owner_name,
             tax_owner_ref_id=ent.tax_owner_ref_id,
             tax_owner_ein=ent.tax_owner_ein,
             tax_owner_country=ent.tax_owner_country,
             is_fde_us_person=ent.is_fde_us_person,
             is_fb_cfc=ent.is_fb_cfc,
-            # Schedule data
             sch_h=self._row_to_dict(h_by_ref.get(ref), "IRS5471ScheduleH_"),
             sch_i=self._row_to_dict(i_by_ref.get(ref), "IRS5471ScheduleI_"),
             sch_i1=self._row_to_dict(i1_by_ref.get(ref), "IRS5471ScheduleI1_"),
@@ -311,7 +351,6 @@ class EntityClassifier:
             sch_p=self._row_to_dict(p_by_ref.get(ref), "IRS5471ScheduleP_"),
         )
 
-        # Detect 8858 entities by checking for tax_owner or FDE flags
         if ent.tax_owner_name or ent.is_fde_us_person or ent.is_fb_cfc:
             entity.form_type = "8858"
 
@@ -342,15 +381,41 @@ class EntityClassifier:
         entity.tag_metadata = result.evidence
 
     @staticmethod
-    def _extract_oit_locator(document_id: str) -> str:
-        """Extract 6-char OIT locator from documentId.
+    def _compute_completeness(entity: ClassifiedEntity) -> None:
+        """Score how complete this entity's schedule data is (0.0–1.0)."""
+        schedule_map = {
+            "c": entity.sch_c,
+            "e": entity.sch_e,
+            "g": entity.sch_g,
+            "h": entity.sch_h,
+            "i": entity.sch_i,
+            "i1": entity.sch_i1,
+            "j": entity.sch_j,
+            "p": entity.sch_p,
+        }
 
-        Format: IRS5471000272I5 → prefix 'IRS5471' (7) + locator (6) + suffix
-        Locator is alphanumeric (hex-like): 000272, 00027A, 00028N
-        """
+        if entity.form_type == "8858":
+            schedule_map["f"] = entity.sch_f
+            expected = _EXPECTED_SCHEDULES_8858
+        elif entity.dormant:
+            expected = _EXPECTED_SCHEDULES_5471_DORMANT
+        else:
+            expected = _EXPECTED_SCHEDULES_5471
+
+        present = {k for k, v in schedule_map.items() if v}
+        entity.present_schedules = sorted(present)
+        entity.missing_schedules = sorted(expected - present)
+
+        if expected:
+            entity.completeness_score = round(len(present & expected) / len(expected), 3)
+        else:
+            entity.completeness_score = 1.0
+
+    @staticmethod
+    def _extract_oit_locator(document_id: str) -> str:
+        """Extract 6-char OIT locator from documentId."""
         if not document_id or len(document_id) < 13:
             return ""
-        # Strip prefix: IRS5471 (7 chars) or IRS8858 (7 chars)
         if document_id.startswith(("IRS5471", "IRS8858")):
             locator = document_id[7:13]
         elif document_id.startswith("F5471"):
@@ -361,15 +426,13 @@ class EntityClassifier:
             return locator
         return ""
 
-    def _index_by_ref(self, df: pd.DataFrame) -> dict[str, pd.Series]:
-        """Index a schedule DataFrame by reference_id -> first row."""
-        if df.empty:
+    @staticmethod
+    def _index_by_ref(df: pd.DataFrame) -> dict[str, pd.Series]:
+        """Index a schedule DataFrame by reference_id -> first row. O(n)."""
+        if df.empty or "_reference_id" not in df.columns:
             return {}
-        result = {}
-        for ref in df["_reference_id"].unique():
-            if ref:
-                result[ref] = df[df["_reference_id"] == ref].iloc[0]
-        return result
+        grouped = df.groupby("_reference_id", sort=False)
+        return {ref: rows.iloc[0] for ref, rows in grouped if ref}
 
     def _row_to_dict(self, row: Optional[pd.Series], prefix: str) -> dict[str, Any]:
         """Convert a DataFrame row to a schedule dict, stripping the prefix."""
