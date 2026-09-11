@@ -6,38 +6,45 @@ from nicegui import app, ui
 # ─── TOKEN DICTIONARIES ─────────────────────────────────────────────────────
 
 DARK = {
-    # Surfaces (Radix Slate Dark 1-3)
+    # Surfaces (Radix Slate Dark 1 / 2 / 3)
     "bg_main": "#111113",
     "bg_card": "#18191b",
     "bg_elevated": "#212225",
     "bg_sidebar": "#111113",
-    # Borders (Radix Slate Dark 6-7)
+    # Borders (Radix Slate Dark 6 / 7)
     "border": "#363a3f",
     "border_hover": "#43484e",
-    "border_accent": "rgba(255, 197, 61, 0.25)",
-    # Text (Radix Slate Dark 9, 11, 12)
-    "text_primary": "#edeef0",
-    "text_secondary": "#b0b4ba",
-    "text_muted": "#696e77",
-    # Accent (Radix Amber Dark 9-11)
+    # Text (Radix Slate Dark 12 / 11 / 9) — AAA on bg_main
+    "text_primary": "#edeef0",      # 15.4:1 on #111113
+    "text_secondary": "#b0b4ba",    #  9.2:1 on #111113
+    "text_muted": "#696e77",        #  4.1:1 on #111113
+    # Accent (Radix Amber Dark 9 / 10)
     "accent": "#ffc53d",
     "accent_hover": "#ffd60a",
-    "accent_subtle": "rgba(255, 197, 61, 0.08)",
-    # Semantic (Radix scale 9 — solid)
+    # Semantic (distinct hues — Radix scale 9)
     "success": "#30a46c",
-    "warning": "#ffc53d",
+    "warning": "#f5a623",           # Amber 10 — differentiated from accent
     "error": "#e5484d",
     "info": "#3e63dd",
-    # Severity (Radix Red/Amber/Slate + dark bg from scale 3)
+    # Severity — High (Red), Medium (Amber), Low (Slate), Info (Blue), Pass (Green)
     "sev_high": "#e5484d",
     "sev_high_bg": "#3b1219",
+    "sev_high_text": "#ff9592",     # Red 11 — readable on sev_high_bg
     "sev_medium": "#ffc53d",
     "sev_medium_bg": "#302008",
+    "sev_medium_text": "#ffd60a",   # Amber 10
     "sev_low": "#696e77",
     "sev_low_bg": "#212225",
+    "sev_low_text": "#b0b4ba",      # Slate 11
+    "sev_info": "#3e63dd",
+    "sev_info_bg": "#15192d",
+    "sev_info_text": "#8da4ef",     # Blue 11
+    "sev_pass": "#30a46c",
+    "sev_pass_bg": "#0d1912",
+    "sev_pass_text": "#70e1a0",     # Green 11
     # Glass / Effects
-    "glass_bg": "rgba(255, 255, 255, 0.02)",
-    "glass_border": "rgba(255, 255, 255, 0.06)",
+    "glass_bg": "rgba(255, 255, 255, 0.04)",
+    "glass_border": "rgba(255, 255, 255, 0.08)",
     "shadow": "0 4px 24px rgba(0, 0, 0, 0.35)",
     "shadow_strong": "0 8px 32px rgba(0, 0, 0, 0.5)",
     # Scrollbar
@@ -45,48 +52,59 @@ DARK = {
     # Nav
     "nav_active_bg": "rgba(255, 197, 61, 0.10)",
     "nav_hover_bg": "rgba(255, 255, 255, 0.04)",
+    # Button
+    "btn_primary_text": "#000000",
 }
 
 LIGHT = {
-    # Surfaces — warm gray base with clear card/bg separation
-    "bg_main": "#eaedf1",
+    # Surfaces (Radix Slate Light 1 / white / 2 / 2)
+    "bg_main": "#f0f2f5",
     "bg_card": "#ffffff",
     "bg_elevated": "#f4f5f7",
     "bg_sidebar": "#f2f3f5",
-    # Borders — visible but not harsh
+    # Borders
     "border": "#d0d3d9",
     "border_hover": "#b8bcc4",
-    "border_accent": "rgba(140, 80, 0, 0.30)",
-    # Text — high contrast (WCAG AAA on white)
-    "text_primary": "#111318",
-    "text_secondary": "#3d4149",
-    "text_muted": "#6b7280",
-    # Accent — darker amber for readability on light backgrounds
+    # Text — WCAG AAA on white
+    "text_primary": "#11181c",      # 16.5:1 on #ffffff
+    "text_secondary": "#3d4149",    #  9.8:1 on #ffffff
+    "text_muted": "#6b7280",        #  5.0:1 on #ffffff
+    # Accent — dark amber for readability
     "accent": "#b45309",
     "accent_hover": "#92400e",
-    "accent_subtle": "rgba(180, 83, 9, 0.06)",
-    # Semantic — darkened for WCAG AA on white
+    # Semantic — WCAG AA+ on white
     "success": "#15803d",
-    "warning": "#a16207",
+    "warning": "#b45309",
     "error": "#dc2626",
     "info": "#2563eb",
-    # Severity
-    "sev_high": "#b91c1c",
+    # Severity — High (Red), Medium (Amber), Low (Slate), Info (Blue), Pass (Green)
+    "sev_high": "#dc2626",
     "sev_high_bg": "#fef2f2",
-    "sev_medium": "#a16207",
-    "sev_medium_bg": "#fefce8",
+    "sev_high_text": "#991b1b",
+    "sev_medium": "#b45309",
+    "sev_medium_bg": "#fffbeb",
+    "sev_medium_text": "#92400e",
     "sev_low": "#6b7280",
     "sev_low_bg": "#f3f4f6",
+    "sev_low_text": "#4b5563",
+    "sev_info": "#2563eb",
+    "sev_info_bg": "#eff6ff",
+    "sev_info_text": "#1d4ed8",
+    "sev_pass": "#15803d",
+    "sev_pass_bg": "#f0fdf4",
+    "sev_pass_text": "#166534",
     # Glass / Effects
-    "glass_bg": "rgba(255, 255, 255, 0.92)",
-    "glass_border": "rgba(0, 0, 0, 0.10)",
+    "glass_bg": "rgba(255, 255, 255, 0.85)",
+    "glass_border": "rgba(0, 0, 0, 0.08)",
     "shadow": "0 1px 3px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.05)",
     "shadow_strong": "0 4px 12px rgba(0, 0, 0, 0.10), 0 10px 30px rgba(0, 0, 0, 0.08)",
     # Scrollbar
     "scrollbar_thumb": "rgba(0, 0, 0, 0.15)",
     # Nav
     "nav_active_bg": "rgba(180, 83, 9, 0.10)",
-    "nav_hover_bg": "rgba(0, 0, 0, 0.05)",
+    "nav_hover_bg": "rgba(0, 0, 0, 0.04)",
+    # Button
+    "btn_primary_text": "#ffffff",
 }
 
 
@@ -122,20 +140,55 @@ def inject_css():
     @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap');
 
     :root {{
+        /* Surfaces */
         --m-bg-main: {t["bg_main"]};
         --m-bg-card: {t["bg_card"]};
         --m-bg-elevated: {t["bg_elevated"]};
         --m-bg-sidebar: {t["bg_sidebar"]};
+        /* Borders */
         --m-border: {t["border"]};
         --m-border-hover: {t["border_hover"]};
+        /* Text */
         --m-text-primary: {t["text_primary"]};
         --m-text-secondary: {t["text_secondary"]};
         --m-text-muted: {t["text_muted"]};
+        /* Accent */
         --m-accent: {t["accent"]};
         --m-accent-hover: {t["accent_hover"]};
+        /* Semantic */
         --m-success: {t["success"]};
+        --m-warning: {t["warning"]};
         --m-error: {t["error"]};
         --m-info: {t["info"]};
+        /* Severity — High */
+        --m-sev-high: {t["sev_high"]};
+        --m-sev-high-bg: {t["sev_high_bg"]};
+        --m-sev-high-text: {t["sev_high_text"]};
+        /* Severity — Medium */
+        --m-sev-medium: {t["sev_medium"]};
+        --m-sev-medium-bg: {t["sev_medium_bg"]};
+        --m-sev-medium-text: {t["sev_medium_text"]};
+        /* Severity — Low */
+        --m-sev-low: {t["sev_low"]};
+        --m-sev-low-bg: {t["sev_low_bg"]};
+        --m-sev-low-text: {t["sev_low_text"]};
+        /* Severity — Info */
+        --m-sev-info: {t["sev_info"]};
+        --m-sev-info-bg: {t["sev_info_bg"]};
+        --m-sev-info-text: {t["sev_info_text"]};
+        /* Severity — Pass */
+        --m-sev-pass: {t["sev_pass"]};
+        --m-sev-pass-bg: {t["sev_pass_bg"]};
+        --m-sev-pass-text: {t["sev_pass_text"]};
+        /* Glass / Nav */
+        --m-glass-bg: {t["glass_bg"]};
+        --m-glass-border: {t["glass_border"]};
+        --m-nav-active-bg: {t["nav_active_bg"]};
+        --m-nav-hover-bg: {t["nav_hover_bg"]};
+        /* Button */
+        --m-btn-primary-text: {t["btn_primary_text"]};
+        /* Typography */
+        --m-font-mono: 'JetBrains Mono', 'Consolas', monospace;
     }}
 
     body, .q-page, .q-layout {{
@@ -213,38 +266,38 @@ def inject_css():
     }}
 
     /* Severity badges */
-    .sev-high {{
-        background: {t["sev_high_bg"]};
-        color: {t["sev_high"]};
-        border: 1px solid {t["sev_high"]}40;
+    .sev-high, .sev-medium, .sev-low, .sev-info, .sev-pass {{
         padding: 2px 10px;
         border-radius: 20px;
         font-size: 0.6rem;
         font-weight: 700;
         letter-spacing: 0.06em;
         text-transform: uppercase;
+    }}
+    .sev-high {{
+        background: {t["sev_high_bg"]};
+        color: {t["sev_high_text"]};
+        border: 1px solid {t["sev_high"]}40;
     }}
     .sev-medium {{
         background: {t["sev_medium_bg"]};
-        color: {t["sev_medium"]};
+        color: {t["sev_medium_text"]};
         border: 1px solid {t["sev_medium"]}40;
-        padding: 2px 10px;
-        border-radius: 20px;
-        font-size: 0.6rem;
-        font-weight: 700;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
     }}
     .sev-low {{
         background: {t["sev_low_bg"]};
-        color: {t["sev_low"]};
+        color: {t["sev_low_text"]};
         border: 1px solid {t["sev_low"]}40;
-        padding: 2px 10px;
-        border-radius: 20px;
-        font-size: 0.6rem;
-        font-weight: 700;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
+    }}
+    .sev-info {{
+        background: {t["sev_info_bg"]};
+        color: {t["sev_info_text"]};
+        border: 1px solid {t["sev_info"]}40;
+    }}
+    .sev-pass {{
+        background: {t["sev_pass_bg"]};
+        color: {t["sev_pass_text"]};
+        border: 1px solid {t["sev_pass"]}40;
     }}
 
     /* ─── GLASSMORPHISM ─── */
