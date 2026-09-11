@@ -109,5 +109,11 @@ Reference in text/commits as `ADR-NNN` (the prefix, not the filename).
 | 010 | [zipfile-xml-xlsx-reader-bypassing-openpyxl](010-zipfile-xml-xlsx-reader-bypassing-openpyxl.md) | Accepted | zipfile+XML xlsx reader bypassing openpyxl |
 | 011 | [oit-sign-convention-adapter](011-oit-sign-convention-adapter.md) | Accepted | OIT sign convention adapter |
 | 012 | [lxml-for-xml-parser-stdlib-et-for-pdf-validator](012-lxml-for-xml-parser-stdlib-et-for-pdf-validator.md) | Accepted | lxml for xml_parser, stdlib ET for pdf_validator |
+| 013 | [three-way-reconciliation-with-tolerance-model](013-three-way-reconciliation-with-tolerance-model.md) | Accepted | Three-way reconciliation with tolerance model |
+| 014 | [pdfplumber-oit-layout-specific-extraction](014-pdfplumber-oit-layout-specific-extraction.md) | Accepted | pdfplumber with OIT-layout-specific extraction |
+| 015 | [mythos-service-facade-as-sole-entry-point](015-mythos-service-facade-as-sole-entry-point.md) | Accepted | MythosService façade as sole entry point |
+| 016 | [page-phase-state-machine-and-singleton-app-state](016-page-phase-state-machine-and-singleton-app-state.md) | Accepted | PagePhase state machine and singleton AppState |
+| 017 | [unified-design-token-system-for-cross-format-output](017-unified-design-token-system-for-cross-format-output.md) | Accepted | Unified design token system for cross-format output |
+| 018 | [batch-pdf-smart-router](018-batch-pdf-smart-router.md) | Accepted | Batch PDF smart router for multi-form OIT exports |
 
 Keep this table updated by hand — new ADR, new row.
