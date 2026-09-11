@@ -206,6 +206,8 @@ async def _run_parse_only(s, current_file, refresh_fn):
 
     s.parser = parser
     s.current_xml = current_file.path
+    s._classified_entities = None
+    s._classified_entities_path = None
 
     summary = await build_parse_summary(parser, parsed)
     xc.parse_summary = summary
@@ -247,6 +249,8 @@ async def _run_rollover_only(s, current_file, refresh_fn):
     parser, parsed, reports = await loop.run_in_executor(None, _run)
 
     s.parser = parser
+    s._classified_entities = None
+    s._classified_entities_path = None
     s.rollover_reports = reports
     summary = await build_parse_summary(parser, parsed)
     xc.parse_summary = summary

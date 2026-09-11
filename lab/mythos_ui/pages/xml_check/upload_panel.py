@@ -205,6 +205,8 @@ async def _handle_upload(e, role: str, refresh_fn):
 
         if role == "current":
             s.current_xml = tmp
+            s._classified_entities = None
+            s._classified_entities_path = None
         else:
             s.prior_xml = tmp
 

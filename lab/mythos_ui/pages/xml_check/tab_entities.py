@@ -25,7 +25,6 @@ def render_entities(t: dict, s):
         filterable_columns={
             "country": "Country",
             "form_type": "Form",
-            "status": "Status",
             "currency": "FC",
         },
         all_rows=all_rows,
@@ -54,9 +53,7 @@ def render_entities(t: dict, s):
         {"name": "country", "label": "Country", "field": "country", "align": "center", "sortable": True},
         {"name": "currency", "label": "FC", "field": "currency", "align": "center", "sortable": True},
         {"name": "form_type", "label": "Form", "field": "form_type", "align": "center", "sortable": True},
-        {"name": "category", "label": "Cat. Filer", "field": "category", "align": "center", "sortable": True},
         {"name": "ownership", "label": "Voting %", "field": "ownership", "align": "center", "sortable": True},
-        {"name": "status", "label": "Status", "field": "status", "align": "center", "sortable": True},
         {"name": "tags", "label": "Tags", "field": "tags", "align": "left"},
     ]
 
@@ -72,16 +69,6 @@ def render_entities(t: dict, s):
 
         # Bind filter strip to table
         strip.bind(table)
-
-        # Custom status cell
-        table.add_slot("body-cell-status", """
-            <q-td :props="props">
-                <q-badge :color="props.row.status === 'Active' ? 'green' :
-                                 props.row.status === 'DRE' ? 'purple' :
-                                 props.row.status === 'Insurance' ? 'blue' : 'grey'"
-                         :label="props.row.status" dense />
-            </q-td>
-        """)
 
         # Custom form_type cell
         table.add_slot("body-cell-form_type", """
@@ -197,18 +184,16 @@ def render_entities(t: dict, s):
     search_input.on("update:model-value", _on_search)
 
     # ── Stats footer ──
-    dormant_count = sum(1 for e in entities if e.dormant)
-    dre_count = sum(1 for e in entities if e.is_dre)
-    active_count = len(entities) - dormant_count
+    by_form = {}
+    for e in entities:
+        ft = getattr(e, "form_type", "5471")
+        by_form[ft] = by_form.get(ft, 0) + 1
 
     with ui.row().classes("items-center gap-4 mt-2"):
-        ui.label(f"{active_count} active").classes("text-xs mythos-mono") \
-            .style(f"color: {t['success']};")
-        if dre_count:
-            ui.label(f"{dre_count} DRE").classes("text-xs mythos-mono") \
-                .style(f"color: {t['info']};")
-        if dormant_count:
-            ui.label(f"{dormant_count} dormant").classes("text-xs mythos-mono") \
+        ui.label(f"{len(entities)} entities").classes("text-xs mythos-mono") \
+            .style(f"color: {t['text_primary']};")
+        for ft, cnt in sorted(by_form.items()):
+            ui.label(f"{cnt} {ft}").classes("text-xs mythos-mono") \
                 .style(f"color: {t['text_muted']};")
 
 
@@ -218,7 +203,7 @@ def _build_rows(entities: list) -> list[dict]:
     """Build table row dicts from classified entities."""
     rows = []
     for i, ent in enumerate(entities):
-        form_type = _determine_form_type(ent)
+        form_type = getattr(ent, "form_type", None) or _determine_form_type(ent)
         ownership = f"{ent.voting_stock_pct * 100:.1f}%" if ent.voting_stock_pct else "—"
         cat_str = ", ".join(ent.category_filers) if ent.category_filers else "—"
 
@@ -236,6 +221,9 @@ def _build_rows(entities: list) -> list[dict]:
 
         locator = getattr(ent, "oit_locator", "") or "—"
 
+        score = getattr(ent, "completeness_score", 0.0)
+        completeness_str = f"{score:.0%}" if score is not None else "—"
+
         rows.append({
             "_id": i,
             "ref_id": ent.reference_id,
@@ -246,6 +234,7 @@ def _build_rows(entities: list) -> list[dict]:
             "form_type": form_type,
             "category": cat_str,
             "ownership": ownership,
+            "completeness": completeness_str,
             "status": status,
             "tags": tag_str,
         })
@@ -253,45 +242,26 @@ def _build_rows(entities: list) -> list[dict]:
 
 
 def _classify_entities(s) -> list:
-    """Run EntityClassifier on the parsed data."""
-    if hasattr(s, "_classified_entities") and s._classified_entities:
-        return s._classified_entities
+    """Run EntityClassifier on the parsed data. Cache invalidates when parser changes."""
+    cached = getattr(s, "_classified_entities", None)
+    cached_path = getattr(s, "_classified_entities_path", None)
+    current_path = str(getattr(s.parser, "path", None))
+
+    if cached and cached_path == current_path:
+        return cached
 
     try:
         from lab.core.entity_classifier import EntityClassifier, ClassifiedEntity
+        from lab.core.entity_registry import EntityRegistry
 
-        classifier = EntityClassifier()
+        registry = EntityRegistry()
+        registry.populate_from_parser(s.parser)
+
+        classifier = EntityClassifier(registry=registry)
         entities = classifier.classify(s.parser)
 
-        # Fill in any entities the classifier missed (8858-only, no ref_id, etc)
-        classified_ids = {e.reference_id for e in entities}
-        parsed = s.parser.parse()
-        for sub in parsed.subsidiaries:
-            ref_id = sub.entity.reference_id
-            name = sub.entity.name or ""
-            identifier = ref_id or name or "Unknown"
-
-            if identifier in classified_ids:
-                continue
-
-            forms = list(sub.forms.keys())
-            has_8858 = any("8858" in f for f in forms)
-            has_5471 = any("5471" in f for f in forms)
-
-            ent = ClassifiedEntity(
-                reference_id=identifier,
-                entity_name=name or identifier,
-                country_code=sub.entity.country_code or "",
-                functional_currency=sub.entity.functional_currency or "",
-                dormant=sub.entity.dormant or False,
-                is_dre=has_8858 and not has_5471,
-            )
-            if has_8858 and not has_5471:
-                ent.tags = {"fde_8858"}
-            entities.append(ent)
-            classified_ids.add(identifier)
-
         s._classified_entities = entities
+        s._classified_entities_path = str(getattr(s.parser, "path", None))
         return entities
     except Exception:
         return []

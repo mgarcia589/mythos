@@ -459,7 +459,12 @@ def _get_classifier_tags(s) -> dict[str, dict]:
         return {}
     try:
         from lab.core.entity_classifier import EntityClassifier
-        classifier = EntityClassifier()
+        from lab.core.entity_registry import EntityRegistry
+
+        registry = EntityRegistry()
+        registry.populate_from_parser(s.parser)
+
+        classifier = EntityClassifier(registry=registry)
         classified = classifier.classify(s.parser)
         result = {}
         for ent in classified:

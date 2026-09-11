@@ -19,6 +19,7 @@ from lab.core.entity_tagger import EntityData, EntityTagger, TagResult
 _EXPECTED_SCHEDULES_5471 = {"c", "e", "h", "i", "i1", "j", "p"}
 _EXPECTED_SCHEDULES_5471_DORMANT = {"h", "j"}
 _EXPECTED_SCHEDULES_8858 = {"c", "f", "h"}
+_EXPECTED_SCHEDULES_8865 = set()
 
 
 @dataclass
@@ -212,13 +213,24 @@ class EntityClassifier:
 
         entities: list[ClassifiedEntity] = []
 
+        seen_ids: set[str] = set()
+        fde_counter = 0
+
         for sub in subsidiaries:
             ref = sub.entity.reference_id
+
             if not ref:
+                ref = self._synthesize_ref_id(sub)
+                if not ref:
+                    fde_counter += 1
+                    ref = f"FDE-{fde_counter:04d}"
+
+            if ref in seen_ids:
                 continue
+            seen_ids.add(ref)
 
             entity = self._build_entity_from_sub(
-                sub,
+                sub, ref,
                 h_by_ref, i_by_ref, i1_by_ref, c_by_ref,
                 e_by_ref, j_by_ref, p_by_ref,
             )
@@ -291,6 +303,7 @@ class EntityClassifier:
     def _build_entity_from_sub(
         self,
         sub,
+        ref: str,
         h_by_ref: dict,
         i_by_ref: dict,
         i1_by_ref: dict,
@@ -301,7 +314,7 @@ class EntityClassifier:
     ) -> ClassifiedEntity:
         """Assemble a ClassifiedEntity from a SubsidiaryReturn (full Page 1 identity)."""
         ent = sub.entity
-        ref = ent.reference_id
+        original_ref = ent.reference_id
 
         voting_pct = None
         if ent.voting_stock_pct:
@@ -313,10 +326,28 @@ class EntityClassifier:
 
         ppob = ""
         doc_id = ""
+        form_type = "5471"
+
         irs5471_form = sub.forms.get("IRS5471")
         if irs5471_form:
             ppob = str(irs5471_form.fields.get("IRS5471_PrincipalPlaceOfBusCountryCd", ""))
             doc_id = irs5471_form.document_id
+
+        irs8858_form = sub.forms.get("IRS8858")
+        if irs8858_form and not irs5471_form:
+            doc_id = irs8858_form.document_id
+            form_type = "8858"
+
+        irs8865_form = sub.forms.get("IRS8865")
+        if irs8865_form and not irs5471_form and not irs8858_form:
+            doc_id = irs8865_form.document_id
+            form_type = "8865"
+
+        has_fde_markers = ent.tax_owner_name or ent.is_fde_us_person or ent.is_fb_cfc
+        if has_fde_markers and form_type == "5471":
+            form_type = "8858"
+
+        is_dre = form_type in ("8858", "8865") and not irs5471_form
 
         entity = ClassifiedEntity(
             reference_id=ref,
@@ -333,7 +364,7 @@ class EntityClassifier:
             province=ent.province,
             postal_code=ent.postal_code,
             principal_place_of_business=ppob,
-            form_type="5471",
+            form_type=form_type,
             document_id=doc_id,
             oit_locator=self._extract_oit_locator(doc_id),
             tax_owner_name=ent.tax_owner_name,
@@ -342,17 +373,15 @@ class EntityClassifier:
             tax_owner_country=ent.tax_owner_country,
             is_fde_us_person=ent.is_fde_us_person,
             is_fb_cfc=ent.is_fb_cfc,
-            sch_h=self._row_to_dict(h_by_ref.get(ref), "IRS5471ScheduleH_"),
-            sch_i=self._row_to_dict(i_by_ref.get(ref), "IRS5471ScheduleI_"),
-            sch_i1=self._row_to_dict(i1_by_ref.get(ref), "IRS5471ScheduleI1_"),
-            sch_c=self._row_to_dict(c_by_ref.get(ref), "IRS5471ScheduleC_"),
-            sch_e=self._row_to_dict(e_by_ref.get(ref), "IRS5471ScheduleE_"),
-            sch_j=self._row_to_dict(j_by_ref.get(ref), "IRS5471ScheduleJ_"),
-            sch_p=self._row_to_dict(p_by_ref.get(ref), "IRS5471ScheduleP_"),
+            is_dre=is_dre,
+            sch_h=self._row_to_dict(h_by_ref.get(original_ref), "IRS5471ScheduleH_") if original_ref else {},
+            sch_i=self._row_to_dict(i_by_ref.get(original_ref), "IRS5471ScheduleI_") if original_ref else {},
+            sch_i1=self._row_to_dict(i1_by_ref.get(original_ref), "IRS5471ScheduleI1_") if original_ref else {},
+            sch_c=self._row_to_dict(c_by_ref.get(original_ref), "IRS5471ScheduleC_") if original_ref else {},
+            sch_e=self._row_to_dict(e_by_ref.get(original_ref), "IRS5471ScheduleE_") if original_ref else {},
+            sch_j=self._row_to_dict(j_by_ref.get(original_ref), "IRS5471ScheduleJ_") if original_ref else {},
+            sch_p=self._row_to_dict(p_by_ref.get(original_ref), "IRS5471ScheduleP_") if original_ref else {},
         )
-
-        if ent.tax_owner_name or ent.is_fde_us_person or ent.is_fb_cfc:
-            entity.form_type = "8858"
 
         return entity
 
@@ -394,7 +423,9 @@ class EntityClassifier:
             "p": entity.sch_p,
         }
 
-        if entity.form_type == "8858":
+        if entity.form_type == "8865":
+            expected = _EXPECTED_SCHEDULES_8865
+        elif entity.form_type == "8858":
             schedule_map["f"] = entity.sch_f
             expected = _EXPECTED_SCHEDULES_8858
         elif entity.dormant:
@@ -412,11 +443,28 @@ class EntityClassifier:
             entity.completeness_score = 1.0
 
     @staticmethod
+    def _synthesize_ref_id(sub) -> str:
+        """Generate a stable ref ID for entities without one (8858/8865 FDEs).
+
+        Extracts the OIT locator from the document_id as a compact, stable identifier.
+        Falls back to '' if no document_id is available.
+        """
+        for form_key in ("IRS8858", "IRS8865", "IRS5471"):
+            form = sub.forms.get(form_key)
+            if form and form.document_id:
+                doc_id = form.document_id
+                prefix_len = len(form_key)
+                locator = doc_id[prefix_len:] if len(doc_id) > prefix_len else ""
+                if locator:
+                    return locator
+        return ""
+
+    @staticmethod
     def _extract_oit_locator(document_id: str) -> str:
         """Extract 6-char OIT locator from documentId."""
         if not document_id or len(document_id) < 13:
             return ""
-        if document_id.startswith(("IRS5471", "IRS8858")):
+        if document_id.startswith(("IRS5471", "IRS8858", "IRS8865")):
             locator = document_id[7:13]
         elif document_id.startswith("F5471"):
             locator = document_id[9:15]

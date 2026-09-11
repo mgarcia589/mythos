@@ -104,6 +104,10 @@ async def run_review(
         state.progress = 1.0
         state.progress_msg = "Complete"
 
+        # Invalidate entity classification cache from prior XML
+        state._classified_entities = None
+        state._classified_entities_path = None
+
         # Append to history
         from datetime import datetime
         state.history.append(HistoryEntry(
