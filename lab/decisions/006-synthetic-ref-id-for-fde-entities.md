@@ -7,7 +7,7 @@
 ## Context
 
 IRS Form 8858 (FDE) and Form 8865 (partnership) entities in e-file XML
-frequently have an empty `reference_id` field. In the S&P Global production
+frequently have an empty `reference_id` field. In a large production
 return (8.2MB, 381 subsidiary nodes), 199 out of 381 had `reference_id=''`.
 These are legitimate entities with full form data — they're just not
 assigned a numeric reference ID by the ONESOURCE software the way 5471
@@ -16,7 +16,7 @@ entities are.
 The original classifier skipped entities without a `reference_id`
 (`if not ref: continue`), which meant 55% of the return's entities were
 invisible. A UI workaround attempted to fill them in by using the entity
-name as the `reference_id`, which put full names like "Canopius Europe
+name as the `reference_id`, which put full entity names like "Subsidiary Europe
 Limited" in the Ref ID column — confusing and not a stable identifier.
 
 ## Decision
@@ -55,7 +55,7 @@ need to be visible.
 **Positive:**
 
 - All entities in the XML are now classified (342 vs 182 previously for
-  the S&P Global return).
+  the production return).
 - Ref IDs are compact and stable — same XML always produces the same IDs.
 - FDEs correctly get `form_type="8858"` and `is_dre=True`, enabling
   proper form-type filtering and completeness scoring.

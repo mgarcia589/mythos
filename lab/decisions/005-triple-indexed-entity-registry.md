@@ -64,7 +64,7 @@ without re-parsing.
   This creates an ordering dependency: parse → populate registry → classify.
   Accepted: this order is natural and enforced by the pipeline.
 - Name-based matching is exact (case-insensitive, trimmed). Fuzzy matching
-  (e.g. "S&P Global Ltd" vs "S&P Global Limited") is not supported.
+  (e.g. "Entity Ltd" vs "Entity Limited") is not supported.
   Accepted for now — IRS e-file entity names are consistent within a return.
 
 **Future review triggers:**
