@@ -106,5 +106,8 @@ Reference in text/commits as `ADR-NNN` (the prefix, not the filename).
 | 007 | [layered-zero-dependency-module-architecture](007-layered-zero-dependency-module-architecture.md) | Accepted | Layered zero-dependency module architecture |
 | 008 | [nicegui-pywebview-desktop-ui](008-nicegui-pywebview-desktop-ui.md) | Accepted | NiceGUI + pywebview as desktop UI framework |
 | 009 | [check-context-dependency-injection](009-check-context-dependency-injection.md) | Accepted | CheckContext dependency injection for the check engine |
+| 010 | [zipfile-xml-xlsx-reader-bypassing-openpyxl](010-zipfile-xml-xlsx-reader-bypassing-openpyxl.md) | Accepted | zipfile+XML xlsx reader bypassing openpyxl |
+| 011 | [oit-sign-convention-adapter](011-oit-sign-convention-adapter.md) | Accepted | OIT sign convention adapter |
+| 012 | [lxml-for-xml-parser-stdlib-et-for-pdf-validator](012-lxml-for-xml-parser-stdlib-et-for-pdf-validator.md) | Accepted | lxml for xml_parser, stdlib ET for pdf_validator |
 
 Keep this table updated by hand — new ADR, new row.
