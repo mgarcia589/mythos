@@ -101,6 +101,10 @@ def start(native: bool = True):
 
 
 def start_with_options(native: bool = True, port: int = 8080, show: bool = True):
+    if native:
+        from lab.mythos_ui.native_window import setup_native_window
+        setup_native_window()
+
     ui.run(
         title="Mythos — Compliance Review",
         native=native,

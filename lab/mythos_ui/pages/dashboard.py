@@ -46,14 +46,12 @@ def _render_dashboard(t: dict, data: DashboardData):
     if data.top_entities:
         _top_entities(t, data)
 
-    # Two-column: Activity + Actions
-    with ui.row().classes("w-full gap-4 animate-fade-up stagger-6"):
-        # Section 6: Recent Activity
-        with ui.column().classes("flex-1"):
+    # Two-column: Activity + Actions — stacks on narrow windows
+    with ui.row().classes("w-full gap-4 flex-wrap animate-fade-up stagger-6"):
+        with ui.column().classes("flex-1 min-w-[300px]"):
             _recent_activity(t, data)
 
-        # Section 7: Action Items
-        with ui.column().classes("flex-1"):
+        with ui.column().classes("flex-1 min-w-[300px]"):
             _action_items(t, data)
 
 
@@ -81,7 +79,7 @@ def _project_header(t: dict, data: DashboardData):
         f"border-top: 3px solid {color}; "
         f"border-radius: 12px; padding: 20px 24px;"
     ):
-        with ui.row().classes("w-full items-center justify-between"):
+        with ui.row().classes("w-full items-start justify-between flex-wrap gap-4"):
             # Left: client + project info
             with ui.column().classes("gap-1"):
                 with ui.row().classes("items-center gap-3"):
@@ -130,8 +128,8 @@ def _project_header(t: dict, data: DashboardData):
 # ─── SECTION 2: KPI STRIP ────────────────────────────────────────────────────
 
 def _kpi_strip(t: dict, data: DashboardData):
-    """Row of 6 KPI cards."""
-    with ui.row().classes("w-full gap-3 animate-fade-up stagger-2"):
+    """Row of 6 KPI cards — wraps to 2 rows on narrow windows."""
+    with ui.row().classes("w-full gap-3 flex-wrap animate-fade-up stagger-2"):
         _kpi_card(t, str(data.total_entities), "Entities", t["info"], "groups")
         _kpi_card(t, str(data.files_processed), "Files Loaded", t["text_primary"], "folder")
         _kpi_card(t, f"{data.modules_completed}/{data.total_modules}", "Modules",
@@ -147,7 +145,7 @@ def _kpi_strip(t: dict, data: DashboardData):
 
 def _kpi_card(t: dict, value: str, label: str, color: str, icon: str):
     """Single KPI card."""
-    with ui.card().classes("flex-1 min-w-[110px] hover-lift").style(
+    with ui.card().classes("flex-1 min-w-[140px] max-w-[220px] hover-lift").style(
         f"background: {t['bg_card']}; border: 1px solid {t['border']}40; "
         f"border-top: 2px solid {color}; border-radius: 10px; padding: 14px 16px;"
     ):
@@ -162,8 +160,8 @@ def _kpi_card(t: dict, value: str, label: str, color: str, icon: str):
 # ─── SECTION 3: MODULE GRID ──────────────────────────────────────────────────
 
 def _module_grid(t: dict, data: DashboardData):
-    """Grid of 4 module status cards."""
-    with ui.row().classes("w-full gap-3 animate-fade-up stagger-3"):
+    """Grid of 4 module status cards — wraps on narrow windows."""
+    with ui.row().classes("w-full gap-3 flex-wrap animate-fade-up stagger-3"):
         for module in data.modules:
             _module_card(t, module)
 
@@ -178,7 +176,7 @@ def _module_card(t: dict, m: ModuleStatus):
     }
     style = status_styles.get(m.status, status_styles["not_run"])
 
-    with ui.card().classes("flex-1 min-w-[200px] glass-card hover-lift cursor-pointer") \
+    with ui.card().classes("flex-1 min-w-[220px] glass-card hover-lift cursor-pointer") \
             .style(
                 f"background: {t['bg_card']}; border: 1px solid {t['border']}40; "
                 f"border-left: 3px solid {style['color']}; "
@@ -218,10 +216,10 @@ def _mini_stat(t: dict, value: str, label: str):
 # ─── SECTION 4: ISSUE DISTRIBUTION ───────────────────────────────────────────
 
 def _issue_distribution(t: dict, data: DashboardData):
-    """Two-column: severity bars + category bars."""
-    with ui.row().classes("w-full gap-4 animate-fade-up stagger-4"):
+    """Two-column: severity bars + category bars — stacks vertically on narrow windows."""
+    with ui.row().classes("w-full gap-4 flex-wrap animate-fade-up stagger-4"):
         # Severity breakdown
-        with ui.card().classes("flex-1 glass-card").style(
+        with ui.card().classes("flex-1 min-w-[280px] glass-card").style(
             f"background: {t['bg_card']}; border: 1px solid {t['border']}40; "
             f"border-radius: 10px; padding: 16px;"
         ):
@@ -249,7 +247,7 @@ def _issue_distribution(t: dict, data: DashboardData):
                         .style(f"color: {color};")
 
         # Category breakdown
-        with ui.card().classes("flex-1 glass-card").style(
+        with ui.card().classes("flex-1 min-w-[280px] glass-card").style(
             f"background: {t['bg_card']}; border: 1px solid {t['border']}40; "
             f"border-radius: 10px; padding: 16px;"
         ):

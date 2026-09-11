@@ -731,6 +731,9 @@ def inject_css():
         .q-drawer .mythos-label {{
             font-size: 0.55rem;
         }}
+        .mythos-content {{
+            padding: 16px !important;
+        }}
     }}
 
     /* ─── RESPONSIVE: 768px ─── */
@@ -744,6 +747,10 @@ def inject_css():
         }}
         .q-header .text-sm {{
             font-size: 0.7rem;
+        }}
+        .mythos-content {{
+            padding: 12px !important;
+            gap: 12px !important;
         }}
         .q-table {{
             overflow-x: auto !important;
